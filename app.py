@@ -36,15 +36,21 @@ hand_detection_process = None
 def get_results():
     conn = sqlite3.connect("salute_results.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM results ORDER BY id DESC LIMIT 15")
+    cursor.execute("SELECT * FROM results ORDER BY id DESC LIMIT 50")
     data = cursor.fetchall()
     conn.close()
     return data
 
 @app.route("/")
+def home():
+    return render_template("index.html")
+@app.route("/track")
+def track():
+    return render_template("tracking.html")
+@app.route("/result")
 def index():
     results = get_results()
-    return render_template("index.html", results=results, tracking=hand_detection_process is not None)
+    return render_template("result_page.html", results=results, tracking=hand_detection_process is not None)
 
 @app.route("/start_tracking")
 def start_tracking():

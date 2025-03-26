@@ -154,7 +154,8 @@ def calculate_palm_angle(index_tip, wrist):
     return abs(palm_angle)  # Absolute value to handle different orientations
 
 # ✅ Camera Setup
-cap = cv2.VideoCapture("http://192.168.72.99:8080/video")
+# cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.13:554/mode=real&idc=1 &ids=1")
+cap = cv2.VideoCapture(0)
 last_store_time = 0  
 
 while cap.isOpened():
@@ -200,7 +201,8 @@ while cap.isOpened():
                 # ✅ Army Salute Detection (80°-100° arm angle, 40°-50° palm angle)
                 # if 80 <= angle <= 100 and 40 <= palm_angle <= 50:
                 if 80 <=angle <= 100:
-                    status = "Army Salute is Correct"
+                    status = "Salute is Correct"
+                    suggestion="perfect"
                 else:
                     status = "Salute is Wrong"
                     suggestion = "Ensure arm is at 80°-100°"

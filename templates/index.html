@@ -3,74 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salute Detection Results</title>
-    <script>
-        // setTimeout(() => { location.reload(); }, 3000);  // Auto-refresh every 3s
-    </script>
-        <style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
-            th, td {
-                border: 1px solid black;
-                padding: 10px;
-                text-align: center;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
-            img {
-                width: 200px;
-                height: auto;
-            }
-            .correct {
-                color: green;
-                font-weight: bold;
-            }
-            .wrong {
-                color: red;
-                font-weight: bold;
-            }
-        </style>
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nova+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nova', monospace;
+        }
+    </style>
 </head>
 <body>
-    <h1>Real-Time Salute Detection</h1>
-    <button onclick="startTracking()">Start Tracking</button>
-<button onclick="stopTracking()">Stop Tracking</button>
-<button onclick="location.reload()">Refresh Results</button>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Date & Time</th>
-            <th>Angle</th>
-            <th>Status</th>
-            <th>Suggestion</th>
-            <th>Screenshot</th>
-        </tr>
-        {% for result in results %}
-        <tr>
-            <td>{{ result[0] }}</td>
-            <td>{{ result[1] }}</td>
-            <td>{{ result[2] }}</td>
-            <td class="{% if result[3] == 'Salute is Correct' %}correct{% else %}wrong{% endif %}">
-                {{ result[3] }}
-            </td>
-            <td>{{ result[4] }}</td>
-            <td><img src="{{ result[5] }}"></td>
-        </tr>
-        {% endfor %}
-    </table>
+<nav>
+        <img class="logo" src="static/Indian_Army_logo.png" alt="">
+        <h1 style="margin: 20px;">Artificial Intelligence Drill Nursery</h1>
 
-    <script>
-        function startTracking() {
-            fetch('/start_tracking').then(response => response.json()).then(data => alert(data.status));
-        }
-        function stopTracking() {
-            fetch('/stop_tracking').then(response => response.json()).then(data => alert(data.status));
-        }
-        </script>
+</nav>
+
+<h2 style="text-align: center;    color: #ba4712;">Choose your drill</h2>
+
+<div class="card-container">
+    <a class="card" href="/track">
+    <div >
+        <h2>Salute</h2>
+        <p>The salute is a gesture of respect and trust.</p>
+    </div>
+    </a>
+    <a class="card" href="/result">
+        <div>
+            <h2> Kadam Tal</h2>
+            <p>Click here for Kadam Tal Tracking.</p>
+        </div>
+    </a>
+    
+    <a class="card" href="/result">
+        <div>
+            <h2>Parede Drill</h2>
+            <p>Click here for Parede drill.</p>
+        </div>
+    </a>  <a class="card" href="/result">
+        <div>
+            <h2>Swing</h2>
+            <p>Click here for Swing.</p>
+        </div>
+    </a>  <a class="card" href="/result">
+        <div>
+            <h2>Slow March</h2>
+            <p>Click here for Slow March.</p>
+        </div>
+    </a>  <a class="card" href="/result">
+        <div>
+            <h2>Tej Chal</h2>
+            <p>Click here for Tej Chal.</p>
+        </div>
+    </a>
+</a>  <a class="card" href="/result">
+    <div>
+        <h2>Parade drill second</h2>
+        <p>Click here for Parade drill second.</p>
+    </div>
+</a>
+</div>
+
+<style>
+
+body {
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+nav {
+    background-color: #007bff;
+    color: white;
+
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    nav .logo{
+        height: 80px;
+        width: 80px;
+        border-radius: 50%;
+    }
+    .card-container {
+        display: flex;
+        margin: 20px;
+        flex-wrap: wrap;
+    }
+    .card {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        width: calc(33.333% - 20px);
+        box-sizing: border-box;
+        text-decoration: none;
+        
+    }
+    .card {
+        background-color: #ffffff;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .card:hover {
+        background-color: #f1f1f1;
+        transform: translateY(-5px);
+    }
+    .card h2, .card p {
+        color: #333;
+    }
+
+</style>
 </body>
 </html>
-
