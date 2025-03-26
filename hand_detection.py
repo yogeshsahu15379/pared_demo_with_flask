@@ -200,7 +200,7 @@ while cap.isOpened():
 
                 # ✅ Army Salute Detection (80°-100° arm angle, 40°-50° palm angle)
                 # if 80 <= angle <= 100 and 40 <= palm_angle <= 50:
-                if 80 <=angle <= 100:
+                if 85 <=angle <= 90:
                     status = "Salute is Correct"
                     suggestion="perfect"
                 else:
@@ -218,7 +218,7 @@ while cap.isOpened():
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
 
             # ✅ Save Screenshot & Data (Every 1 second)
-            if current_time - last_store_time >= 1:
+            if int(current_time) - int(last_store_time) >= 1:
                 last_store_time = current_time
 
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
