@@ -56,7 +56,7 @@ def index():
 def start_tracking():
     global hand_detection_process
     if hand_detection_process is None:
-        hand_detection_process = subprocess.Popen(["python", "hand_detection.py"])
+        hand_detection_process = subprocess.Popen(["python", "salute_detection.py"])
     return jsonify({"status": "Tracking started"})
 
 @app.route("/stop_tracking")

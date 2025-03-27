@@ -1,0 +1,1 @@
+https://mediapipe.readthedocs.io/en/latest/solutions/hands.html#mediapipe-hands

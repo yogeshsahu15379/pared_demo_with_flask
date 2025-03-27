@@ -193,7 +193,9 @@ while cap.isOpened():
 
                 index_tip = (int(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * width),
                              int(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * height))
-
+                
+                shoulder = hand_landmarks.landmark[mp_hands.HandLandmark.Right_shoulder]
+                print(shoulder)
                 # ✅ Calculate Angles
                 angle = calculate_angle(shoulder, elbow, wrist)  # Arm angle
                 # palm_angle = calculate_palm_angle(index_tip, wrist)  # Palm angle
