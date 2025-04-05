@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tej chal Tracking</title>
+    <title>Hill March Tracking</title>
     <link
       rel="stylesheet"
       href="../static/style.css"
@@ -11,7 +11,7 @@
   </head>
   <body>
     <div class="container mt-5">
-      <h1 style="text-align: center">Tej Chal Control Panel</h1>
+      <h1 style="text-align: center">Hill March Control Panel</h1>
       <button type="button" class="btn start" onclick="startTracking()">
         Start Tracking
       </button>
@@ -24,12 +24,12 @@
     </div>
     <script>
       function startTracking() {
-        fetch("/start_tracking/tejchal")
+        fetch("/start_tracking/hillmarch")
           .then((response) => response.json())
           .then((data) => alert(data.status));
       }
       function stopTracking() {
-        fetch("/stop_tracking/tejchal")
+        fetch("/stop_tracking/hillmarch")
           .then((response) => response.json())
           .then((data) => alert(data.status));
       }

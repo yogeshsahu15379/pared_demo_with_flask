@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,111 +11,143 @@
             font-family: 'Nova', monospace;
         }
     </style>
+    <style>
+  body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #007bff;
+            color: white;
+
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        nav .logo {
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 20px;
+            gap: 10px; /* Add gap for better spacing */
+            justify-content: center; /* Center cards */
+        }
+
+        .card {
+            flex: 1 1 calc(33.333% - 20px); /* Adjust width dynamically */
+            max-width: 300px; /* Optional: Limit max width */
+            border: 1px solid #ddd; /* Subtle border */
+            border-radius: 10px; /* Rounded corners */
+            padding: 20px; /* Increased padding */
+            box-sizing: border-box;
+            text-decoration: none;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            background-color: #f9f9f9; /* Slightly lighter background */
+            transform: translateY(-10px); /* More pronounced hover effect */
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+        }
+
+        .card h2 {
+            color: #007bff; /* Accent color for titles */
+            font-size: 1.5em; /* Larger font size */
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #555; /* Softer text color */
+            font-size: 1em;
+            line-height: 1.5; /* Better readability */
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                flex: 1 1 calc(50% - 20px); /* Adjust for smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                flex: 1 1 100%; /* Full width for very small screens */
+            }
+        }
+    </style>
 </head>
+
 <body>
-<nav>
+    <nav>
         <img class="logo" src="static/Indian_Army_logo.png" alt="">
         <h1 style="margin: 20px;">Artificial Intelligence Drill Nursery</h1>
 
-</nav>
+    </nav>
 
-<h2 style="text-align: center;    color: #ba4712;">Choose your drill</h2>
+    <h2 style="text-align: center;    color: #ba4712;">Choose your drill</h2>
 
-<div class="card-container">
-    <a class="card" href="/salute">
-    <div >
-        <h2>Salute</h2>
-        <p>The salute is a gesture of respect and trust.</p>
-    </div>
-    </a>
-    <a class="card" href="/kadamchal">
-        <div>
-            <h2> Kadam Tal</h2>
-            <p>Click here for Kadam Tal Tracking.</p>
-        </div>
-    </a>
-    
-    <!-- <a class="card" href="/result">
+    <div class="card-container">
+        <a class="card" href="/salute">
+            <div>
+                <h2>Salute</h2>
+                <p>The salute is a gesture of respect and trust.</p>
+            </div>
+        </a>
+        <a class="card" href="/kadamchal">
+            <div>
+                <h2> Kadam Tal</h2>
+                <p>Click here for Kadam Tal Tracking.</p>
+            </div>
+        </a>
+
+        <!-- <a class="card" href="/result">
         <div>
             <h2>Parede Drill</h2>
             <p>Click here for Parede drill.</p>
         </div>
     </a>  -->
-     <a class="card" href="/bajuswing">
-        <div>
-            <h2>Baju Swing</h2>
-            <p>Click here for Swing.</p>
-        </div>
-    </a>  <a class="card" href="/result">
-        <div>
-            <h2>Slow March Track</h2>
-            <p>Click here for Slow March.</p>
-        </div>
-    </a>  <a class="card" href="/result">
-        <div>
-            <h2>Tej Chal Track No. 1</h2>
-            <p>Click here for Tej Chal.</p>
-        </div>
-    </a>
-</a>  <a class="card" href="/result">
-    <div>
-        <h2>Tej Chal Track No. 2</h2>
-        <p>Click here for Parade drill second.</p>
+        <a class="card" href="/bajuswing">
+            <div>
+                <h2>Baju Swing</h2>
+                <p>Click here for Swing.</p>
+            </div>
+        </a> <a class="card" href="/slowmarch">
+            <div>
+                <h2>Slow March Track</h2>
+                <p>Click here for Slow March.</p>
+            </div>
+        </a> <a class="card" href="/tejchal">
+            <div>
+                <h2>Tej March</h2>
+                <p>Click here for Tej Chal.</p>
+            </div>
+        </a>
+        </a> <a class="card" href="/hillmarch">
+            <div>
+                <h2>Hill March</h2>
+                <p>Click here for Hill March.</p>
+            </div>
+        </a>
+        </a> 
+        <!-- <a class="card" href="/result">
+            <div>
+                <h2>Baju Swing track 2</h2>
+                <p>Click here for Baju swing track 2.</p>
+            </div>
+        </a> -->
     </div>
-</a>
-</div>
 
-<style>
 
-body {
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 0;
-}
-
-nav {
-    background-color: #007bff;
-    color: white;
-
-        padding: 10px;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    nav .logo{
-        height: 80px;
-        width: 80px;
-        border-radius: 50%;
-    }
-    .card-container {
-        display: flex;
-        margin: 20px;
-        flex-wrap: wrap;
-    }
-    .card {
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        margin: 10px;
-        width: calc(33.333% - 20px);
-        box-sizing: border-box;
-        text-decoration: none;
-        
-    }
-    .card {
-        background-color: #ffffff;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-
-    .card:hover {
-        background-color: #f1f1f1;
-        transform: translateY(-5px);
-    }
-    .card h2, .card p {
-        color: #333;
-    }
-
-</style>
 </body>
+
 </html>

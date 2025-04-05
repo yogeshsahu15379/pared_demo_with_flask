@@ -184,8 +184,8 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 color = (0, 255, 0) if "Correct" in status else (0, 0, 255)
                 cv2.putText(image, f'Suggestion: {suggestion}', (50, 50),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-                # cv2.putText(image, f'Suggestion: KAdam chal module', (50, 150),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(image, f'Suggestion: Slow March module', (50, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                 
                 # # Visualize angle
                 cv2.putText(image, str(int(right_elbow_angle)), 

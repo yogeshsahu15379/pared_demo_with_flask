@@ -46,6 +46,14 @@ def bajuswing():
 def slowmarch():
     return render_template("slow_march_tracking.html")
 
+@app.route("/tejchal")
+def tejchal():
+    return render_template("tej_chal_tracking.html")
+
+@app.route("/hillmarch")
+def hillmarch():
+    return render_template("hill_march_tracking.html")
+
 @app.route("/result")
 def index():
     results = get_results()
@@ -61,7 +69,7 @@ def kadamchal_result():
 def start_tracking(mode):
     global tracking_processes
 
-    if mode not in ["salute", "kadamchal","baju_swing_1", "baju_swing_2"]:
+    if mode not in ["salute", "kadamchal","baju_swing_1", "tejchal","slowmarch","hillmarch"]:
         return jsonify({"error": "Invalid mode"}), 400
 
     if mode in tracking_processes:
@@ -71,6 +79,9 @@ def start_tracking(mode):
         "salute": "salute_detection.py",
         "kadamchal": "kadamchal_detection.py",
         "baju_swing_1": "baju_swing_detection.py",
+        "tejchal": "tej_chal_detection.py",
+        "slowmarch": "slow_march_detection.py",
+        "hillmarch": "hill_march_detection.py",
     }.get(mode)
     tracking_processes[mode] = subprocess.Popen(["python", script])
 
