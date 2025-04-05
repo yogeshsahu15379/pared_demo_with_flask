@@ -154,8 +154,8 @@ def calculate_palm_angle(index_tip, wrist):
     return abs(palm_angle)  # Absolute value to handle different orientations
 
 # ✅ Camera Setup
-# cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.13:554/mode=real&idc=1 &ids=1")
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.13:554/mode=real&idc=1 &ids=1")
+# cap = cv2.VideoCapture(0)
 last_store_time = 0  
 
 while cap.isOpened():

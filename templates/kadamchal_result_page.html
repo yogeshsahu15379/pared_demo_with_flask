@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salute Detection Results</title>
+    <title>kadamchal Results</title>
     <script>
         // setTimeout(() => { location.reload(); }, 3000);  // Auto-refresh every 3s
     </script>
@@ -36,7 +36,7 @@
         </style>
 </head>
 <body>
-    <h1>Track your self</h1>
+    <h1>kadamchal results</h1>
 <button onclick="location.reload()">Refresh Results</button>
     <table border="1">
         <tr>
@@ -48,17 +48,13 @@
             <th>Screenshot</th>
         </tr>
         {% for result in results %}
-        <tr>
-            <td>{{ result[0] }}</td>
-            <td>{{ result[1] }}</td>
-            <td>{{ result[2] }}</td>
-            <td class="{% if result[3] == 'Salute is Correct' %}correct{% else %}wrong{% endif %}">
-                {{ result[3] }}
-            </td>
-            <td>{{ result[4] }}</td>
-            <td><img src="{{ result[5] }}"></td>
-        </tr>
-        {% endfor %}
+<tr>
+    <td>{{ result[0] }}</td>
+    <td>{{ result[1] }}</td>
+    <td >{{ result[2]}}</td>
+</tr>
+{% endfor %}
+
     </table>
 </body>
 </html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slow march Tracking</title>
+    <link
+      rel="stylesheet"
+      href="../static/style.css"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 style="text-align: center">Slow March Control Panel</h1>
+      <button type="button" class="btn start" onclick="startTracking()">
+        Start Tracking
+      </button>
+      <button type="button" class="btn stop" onclick="stopTracking()">
+        Stop Tracking
+      </button>
+      <a href="/result"
+        ><button type="button" class="btn result">View Result</button></a
+      >
+    </div>
+    <script>
+      function startTracking() {
+        fetch("/start_tracking/slowmarch")
+          .then((response) => response.json())
+          .then((data) => alert(data.status));
+      }
+      function stopTracking() {
+        fetch("/stop_tracking/slowmarch")
+          .then((response) => response.json())
+          .then((data) => alert(data.status));
+      }
+    </script>
+  </body>
+</html>
