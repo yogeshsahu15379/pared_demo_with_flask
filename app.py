@@ -16,7 +16,7 @@ def get_results():
 def kadamchal_results():
     conn = sqlite3.connect("salute_results.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM kadamtal ORDER BY id DESC LIMIT 50")
+    cursor.execute("SELECT * FROM kadamtal_result ORDER BY id DESC LIMIT 50")
     data = cursor.fetchall()
     conn.close()
     return data

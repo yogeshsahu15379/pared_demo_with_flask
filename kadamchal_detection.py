@@ -14,10 +14,14 @@ mp_pose = mp.solutions.pose
 conn = sqlite3.connect("salute_results.db", check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS kadamtal (
+    CREATE TABLE IF NOT EXISTS kadamtal_result (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT,
-        data JSON
+        angle REAL,
+        palm_angle REAL,
+        status TEXT,
+        suggestion TEXT,
+        screenshot_path TEXT
     )
 """)
 conn.commit()
@@ -60,8 +64,15 @@ def read_frames():
 frame_thread = threading.Thread(target=read_frames, daemon=True)
 frame_thread.start()
 
-high_knee_position = 0
-data = []
+low_knee_position = None
+previous_knee_position = None
+data ={
+    "timestamp": None,
+    "angle": None,
+    "status": None,
+    "suggestion": None,
+    "screenshot_path": None
+}
 
 # ✅ Mediapipe Pose Model
 with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
@@ -121,35 +132,41 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 right_wrist_angle = calculate_angle(right_elbow, right_wrist, right_index)
                 right_knee_angle = calculate_angle(right_hip, right_knee, right_ankle)
                 right_ankle_angle = calculate_angle(right_knee, right_ankle, right_foot_index)
-                right_hip_angle = calculate_angle(right_shoulder,right_hip,right_ankle)
+                right_hip_angle = calculate_angle(right_shoulder,right_hip,right_knee)
                 
                 left_ankle_angle = calculate_angle(left_knee, left_ankle, left_foot_index)
                 left_knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
                 left_wrist_angle = calculate_angle(left_elbow, left_wrist, left_index)
                 left_arm_angle = calculate_angle(left_hip, left_shoulder, left_elbow)
                 left_elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
-                left_hip_angle = calculate_angle(left_shoulder,left_hip,left_ankle)
+                left_hip_angle = calculate_angle(left_shoulder,left_hip,left_knee)
                 # TO-Do will remove this later
                 arm_straight_angle = calculate_angle(left_shoulder, right_shoulder, right_elbow)
 
-                angle = "Elbow Angle: " + str(int(right_elbow_angle)) + " Arm Angle: " + str(int(right_arm_angle)) + " Wrist Angle: " + str(int(right_wrist_angle))
-                status = "Salute is wrong"
+                angle = "right knee Angle: " + str(int(right_knee_angle)) + " left knee Angle: " + str(int(left_knee_angle)) + " right elbow Angle: " + str(int(right_elbow_angle))
+                status = "both leg are grounded."
+                leg= "no leg up"
 
 
                 if right_knee_angle < 150 and left_knee_angle > 170:
-                    if 150 <= right_elbow_angle <= 180 and 170 <= right_wrist_angle <= 180 and 55 <= right_knee_angle <= 100 and 105 <= right_ankle_angle <= 140:
+                    leg= "right"
+                    angle = "right knee Angle: " + str(int(right_knee_angle)) + " left knee Angle: " + str(int(left_knee_angle)) + " right elbow Angle: " + str(int(right_elbow_angle)) + " left elbow Angle: " + str(int(left_elbow_angle)) + "right hip Angle: " + str(int(right_hip_angle)) + " left hip Angle: " + str(int(left_hip_angle)) + " right ankle Angle: " + str(int(right_ankle_angle)) + " left ankle Angle: " + str(int(left_ankle_angle))
+                    if 150 <= right_elbow_angle <= 180 and 170 <= right_wrist_angle <= 180 and right_hip_angle<80 and 70 <= right_knee_angle <= 100 and 105 <= right_ankle_angle <= 140:
                         suggestion = "Perfect Right Leg Up Position"
-                        status = "Salute is Correct"
+                        status = "right kadam is Correct"
                     else:
+                        status = "right kadam is wrong"
                         if right_elbow_angle < 150:
                             suggestion = f"Straighten right elbow slightly [{int(right_elbow_angle)}]"
+                        elif right_hip_angle > 80:
+                            suggestion = f"right leg upper uthao [{int(right_hip_angle)}]"
                         elif right_elbow_angle > 180:
                             suggestion = f"Bend right elbow slightly [{int(right_elbow_angle)}]"
                         elif right_wrist_angle < 170:
                             suggestion = f"Straighten right wrist slightly [{int(right_wrist_angle)}]"
                         elif right_wrist_angle > 180:
                             suggestion = f"Bend right wrist slightly [{int(right_wrist_angle)}]"
-                        elif right_knee_angle < 55:
+                        elif right_knee_angle < 70:
                             suggestion = f"Raise right knee slightly [{int(right_knee_angle)}]"
                         elif right_knee_angle > 100:
                             suggestion = f"Lower right knee slightly [{int(right_knee_angle)}]"
@@ -159,19 +176,24 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             suggestion = f"Lower right ankle slightly [{int(right_ankle_angle)}]"
                     
                 elif left_knee_angle < 150 and right_knee_angle > 170:
-                    if 150 <= left_elbow_angle <= 180 and 170 <= left_wrist_angle <= 180 and 55 <= left_knee_angle <= 100 and 105 <= left_ankle_angle <= 140:
-                        suggestion = "Perfect Right Leg Up Position"
-                        status = "Salute is Correct"
+                    leg= "left"
+                    angle = "right knee Angle: " + str(int(right_knee_angle)) + " left knee Angle: " + str(int(left_knee_angle)) + " right elbow Angle: " + str(int(right_elbow_angle)) + " left elbow Angle: " + str(int(left_elbow_angle)) + "right hip Angle: " + str(int(right_hip_angle)) + " left hip Angle: " + str(int(left_hip_angle)) + " right ankle Angle: " + str(int(right_ankle_angle)) + " left ankle Angle: " + str(int(left_ankle_angle))
+                    if 150 <= left_elbow_angle <= 180 and 170 <= left_wrist_angle <= 180 and left_hip_angle<80 and 70 <= left_knee_angle <= 100 and 105 <= left_ankle_angle <= 140 :
+                        suggestion = "Perfect leg Leg Up Position"
+                        status = "left kadam is Correct"
                     else:
+                        status = "left kadam is wrong"
                         if left_elbow_angle < 150:
                             suggestion = f"Straighten left elbow slightly [{int(left_elbow_angle)}]"
+                        elif left_hip_angle > 80:
+                            suggestion = f"left leg upper uthao [{int(left_hip_angle)}]"
                         elif left_elbow_angle > 180:
                             suggestion = f"Bend left elbow slightly [{int(left_elbow_angle)}]"
                         elif left_wrist_angle < 170:
                             suggestion = f"Straighten left wrist slightly [{int(left_wrist_angle)}]"
                         elif left_wrist_angle > 180:
                             suggestion = f"Bend left wrist slightly [{int(left_wrist_angle)}]"
-                        elif left_knee_angle < 55:
+                        elif left_knee_angle < 70:
                             suggestion = f"Raise left knee slightly [{int(left_knee_angle)}]"
                         elif left_knee_angle > 100:
                             suggestion = f"Lower left knee slightly [{int(left_knee_angle)}]"
@@ -251,18 +273,53 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             tuple(np.multiply(left_hip, [840, 600]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
-                
-                if high_knee_position >= right_knee_angle:
-                    high_knee_position = right_knee_angle
-                elif right_knee_angle > 150:
-                    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                    screenshot_path = f"static/screenshots/kadamtal_{int(time.time())}.jpg"
-                    cv2.imwrite(screenshot_path, frame)
-                    data_entry = {"leg": "right", "angle": f"right_knee_angle: {right_knee_angle}", "time": current_time,"screen":screenshot_path}
-                    data.append(data_entry)
-                    cursor.execute("INSERT INTO kadamtal (timestamp, data) VALUES (?, ?)",
-                                   (timestamp, json.dumps(data_entry)))  # Serialize data_entry to JSON
-                    conn.commit()
+                if(leg == "right"):
+                    if previous_knee_position is not None:
+                        if right_hip_angle < previous_knee_position:
+                            low_knee_position = right_hip_angle
+                            screenshot_path = f"static/screenshots/kadamtal_{int(time.time())}.jpg"
+                            data["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                            data["angle"] = angle
+                            data["status"] = status
+                            data["suggestion"] = suggestion
+                            data["screenshot_path"] = screenshot_path
+                            cv2.imwrite(screenshot_path, frame)
+
+                        elif right_knee_angle >150 and low_knee_position is not None:
+                            cursor.execute("INSERT INTO kadamtal_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
+                                    (data["timestamp"], data["angle"], data["status"], data["suggestion"], data["screenshot_path"]))
+                            conn.commit()   
+                            low_knee_position = None
+                    previous_knee_position = right_hip_angle
+                elif(leg == "left"):
+                    if previous_knee_position is not None:
+                        if left_hip_angle < previous_knee_position:
+                            low_knee_position = left_hip_angle
+                            screenshot_path = f"static/screenshots/kadamtal_{int(time.time())}.jpg"
+                            data["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                            data["angle"] = angle
+                            data["status"] = status
+                            data["suggestion"] = suggestion
+                            data["screenshot_path"] = screenshot_path
+                            cv2.imwrite(screenshot_path, frame)
+
+                        elif right_knee_angle >150 and low_knee_position is not None:
+                            cursor.execute("INSERT INTO kadamtal_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
+                                    (data["timestamp"], data["angle"], data["status"], data["suggestion"], data["screenshot_path"]))
+                            conn.commit()   
+                            low_knee_position = None
+                    previous_knee_position = left_hip_angle
+
+                # if high_knee_position >= right_knee_angle:
+                #     high_knee_position = right_knee_angle
+                # elif right_knee_angle > 150 and (right_hip_angle < 130 or left_hip_angle < 130):
+                #     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                #     screenshot_path = f"static/screenshots/kadamtal_{int(time.time())}.jpg"
+                #     cv2.imwrite(screenshot_path, frame)
+
+                    # cursor.execute("INSERT INTO kadamtal_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
+                    #             (timestamp, angle, status, suggestion, screenshot_path))
+                    # conn.commit()   
 
 
 

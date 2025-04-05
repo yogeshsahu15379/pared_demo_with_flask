@@ -38,24 +38,28 @@
 <body>
     <h1>kadamchal results</h1>
 <button onclick="location.reload()">Refresh Results</button>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Date & Time</th>
-            <th>Angle</th>
-            <th>Status</th>
-            <th>Suggestion</th>
-            <th>Screenshot</th>
-        </tr>
-        {% for result in results %}
-<tr>
-    <td>{{ result[0] }}</td>
-    <td>{{ result[1] }}</td>
-    <td >{{ result[2]}}</td>
-</tr>
-{% endfor %}
-
-    </table>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Date & Time</th>
+        <th>Angle</th>
+        <th>Status</th>
+        <th>Suggestion</th>
+        <th>Screenshot</th>
+    </tr>
+    {% for result in results %}
+    <tr>
+        <td>{{ result[0] }}</td>
+        <td>{{ result[1] }}</td>
+        <td>{{ result[2] }}</td>
+        <td class="{% if 'correct' in result[4]|lower %}correct{% else %}wrong{% endif %}">
+            {{ result[4] }}
+        </td>
+        <td>{{ result[5] }}</td>
+        <td><img src="{{ result[6] }}"></td>
+    </tr>
+    {% endfor %}
+</table>
 </body>
 </html>
 

@@ -38,8 +38,8 @@ def calculate_angle(a, b, c):
     return angle 
 
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
-# cap = cv2.VideoCapture(0)  # ✅ Webcam
+# cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  
@@ -125,7 +125,7 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 left_wrist_angle = calculate_angle(left_elbow, left_wrist, left_index)
                 left_arm_angle = calculate_angle(left_hip, left_shoulder, left_elbow)
                 left_elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
-                left_hip_angle = calculate_angle(left_shoulder,left_hip,left_ankle)
+                left_hip_angle = calculate_angle(left_shoulder,left_hip,left_knee)
                 # TO-Do will remove this later
                 arm_straight_angle = calculate_angle(left_shoulder, right_shoulder, right_elbow)
 
@@ -188,61 +188,61 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                 
                 # # Visualize angle
-                cv2.putText(image, str(int(right_elbow_angle)), 
-                               tuple(np.multiply(right_elbow, [840, 600]).astype(int)), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(right_arm_angle)),
-                            tuple(np.multiply(right_shoulder, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(right_wrist_angle)),
-                            tuple(np.multiply(right_wrist, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(arm_straight_angle)),
-                            tuple(np.multiply(left_shoulder, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
+                # cv2.putText(image, str(int(right_elbow_angle)), 
+                #                tuple(np.multiply(right_elbow, [840, 600]).astype(int)), 
+                #                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(right_arm_angle)),
+                #             tuple(np.multiply(right_shoulder, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(right_wrist_angle)),
+                #             tuple(np.multiply(right_wrist, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(arm_straight_angle)),
+                #             tuple(np.multiply(left_shoulder, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
                 
-                cv2.putText(image, str(int(right_knee_angle)),
-                            tuple(np.multiply(right_knee, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
+                # cv2.putText(image, str(int(right_knee_angle)),
+                #             tuple(np.multiply(right_knee, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
                 
-                cv2.putText(image, str(int(right_hip_angle)),
-                            tuple(np.multiply(right_hip, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
+                # cv2.putText(image, str(int(right_hip_angle)),
+                #             tuple(np.multiply(right_hip, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
                 
-                cv2.putText(image, str(int(right_ankle_angle)),
-                            tuple(np.multiply(right_ankle, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image,str(int(left_ankle_angle)),
-                            tuple(np.multiply(left_ankle, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(left_elbow_angle)), 
-                               tuple(np.multiply(left_elbow, [840, 600]).astype(int)), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(left_arm_angle)),
-                            tuple(np.multiply(left_shoulder, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(left_wrist_angle)),
-                            tuple(np.multiply(left_wrist, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(left_knee_angle)),
-                            tuple(np.multiply(left_knee, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(left_elbow_angle)),
-                            tuple(np.multiply(left_elbow, [840, 600]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
+                # cv2.putText(image, str(int(right_ankle_angle)),
+                #             tuple(np.multiply(right_ankle, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image,str(int(left_ankle_angle)),
+                #             tuple(np.multiply(left_ankle, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(left_elbow_angle)), 
+                #                tuple(np.multiply(left_elbow, [840, 600]).astype(int)), 
+                #                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(left_arm_angle)),
+                #             tuple(np.multiply(left_shoulder, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(left_wrist_angle)),
+                #             tuple(np.multiply(left_wrist, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(left_knee_angle)),
+                #             tuple(np.multiply(left_knee, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
+                # cv2.putText(image, str(int(left_elbow_angle)),
+                #             tuple(np.multiply(left_elbow, [840, 600]).astype(int)),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                #                     )
                  
                 cv2.putText(image, str(int(left_hip_angle)),
                             tuple(np.multiply(left_hip, [840, 600]).astype(int)),
