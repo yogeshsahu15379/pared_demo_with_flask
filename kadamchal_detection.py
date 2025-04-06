@@ -197,30 +197,6 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             suggestion = f"Straighten right elbow slightly [right_elbow_angle: {int(right_elbow_angle)}]"
                         elif right_wrist_angle < 170:
                             suggestion = f"Straighten Right Wrist [right_wrist_angle: {int(right_wrist_angle)}]"
-                       
-                    # if 150 <= right_elbow_angle <= 180 and 170 <= right_wrist_angle <= 180 and right_hip_angle<80 and 70 <= right_knee_angle <= 100 and 105 <= right_ankle_angle <= 140:
-                    #     suggestion = "Perfect Right Leg Up Position"
-                    #     status = "right kadam is Correct"
-                    # else:
-                    #     status = "right kadam is wrong"
-                    #     if right_elbow_angle < 150:
-                    #         suggestion = f"Straighten right elbow slightly [{int(right_elbow_angle)}]"
-                    #     elif right_hip_angle > 80:
-                    #         suggestion = f"right leg upper uthao [{int(right_hip_angle)}]"
-                    #     elif right_elbow_angle > 180:
-                    #         suggestion = f"Bend right elbow slightly [{int(right_elbow_angle)}]"
-                    #     elif right_wrist_angle < 170:
-                    #         suggestion = f"Straighten right wrist slightly [{int(right_wrist_angle)}]"
-                    #     elif right_wrist_angle > 180:
-                    #         suggestion = f"Bend right wrist slightly [{int(right_wrist_angle)}]"
-                    #     elif right_knee_angle < 70:
-                    #         suggestion = f"Raise right knee slightly [{int(right_knee_angle)}]"
-                    #     elif right_knee_angle > 100:
-                    #         suggestion = f"Lower right knee slightly [{int(right_knee_angle)}]"
-                    #     elif right_ankle_angle < 105:
-                    #         suggestion = f"Raise right ankle slightly [{int(right_ankle_angle)}]"
-                    #     elif right_ankle_angle > 140:
-                    #         suggestion = f"Lower right ankle slightly [{int(right_ankle_angle)}]"
                     
                 elif left_knee_angle < 150 and right_knee_angle > 170:
                     leg= "left"
@@ -274,29 +250,6 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                         elif left_wrist_angle < 170:
                             suggestion = f"Left wrist should be straight  [left_wrist_angle :{int(left_wrist_angle)}]"
 
-                    # if 150 <= left_elbow_angle <= 180 and 170 <= left_wrist_angle <= 180 and left_hip_angle<80 and 70 <= left_knee_angle <= 100 and 105 <= left_ankle_angle <= 140 :
-                    #     suggestion = "Perfect leg Leg Up Position"
-                    #     status = "left kadam is Correct"
-                    # else:
-                    #     status = "left kadam is wrong"
-                    #     if left_elbow_angle < 150:
-                    #         suggestion = f"Straighten left elbow slightly [{int(left_elbow_angle)}]"
-                    #     elif left_hip_angle > 80:
-                    #         suggestion = f"left leg upper uthao [{int(left_hip_angle)}]"
-                    #     elif left_elbow_angle > 180:
-                    #         suggestion = f"Bend left elbow slightly [{int(left_elbow_angle)}]"
-                    #     elif left_wrist_angle < 170:
-                    #         suggestion = f"Straighten left wrist slightly [{int(left_wrist_angle)}]"
-                    #     elif left_wrist_angle > 180:
-                    #         suggestion = f"Bend left wrist slightly [{int(left_wrist_angle)}]"
-                    #     elif left_knee_angle < 70:
-                    #         suggestion = f"Raise left knee slightly [{int(left_knee_angle)}]"
-                    #     elif left_knee_angle > 100:
-                    #         suggestion = f"Lower left knee slightly [{int(left_knee_angle)}]"
-                    #     elif left_ankle_angle < 105:
-                    #         suggestion = f"Raise left ankle slightly [{int(left_ankle_angle)}]"
-                    #     elif left_ankle_angle > 140:
-                    #         suggestion = f"Lower left ankle slightly [{int(left_ankle_angle)}]"
                 else:
                     suggestion = "Invalid state: Both legs are either up or grounded."
                 

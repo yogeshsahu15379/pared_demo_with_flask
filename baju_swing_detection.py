@@ -17,6 +17,7 @@ cursor.execute("""
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT,
         angle REAL,
+        palm_angle REAL, b 
         status TEXT,
         suggestion TEXT,
         screenshot_path TEXT
@@ -25,22 +26,22 @@ cursor.execute("""
 conn.commit()
 
 def calculate_angle(a, b, c):
-    """Calculate angle between three points"""
-    a = np.array(a)  # First point (shoulder)
-    b = np.array(b)  # Middle point (elbow)
-    c = np.array(c)  # End point (wrist)
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
     
-    ba = a - b
-    bc = c - b
-    
-    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-    angle = np.degrees(np.arccos(cosine_angle))
-    
-    return angle
-
-
+    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
+    angle = np.abs(radians * 180.0 / np.pi)
+    if angle > 180.0:
+        angle = 360.0 - angle
+        
+    return angle 
+# rtsp://192.168.0.11:554/1/1?transmode=unicast&profile=va
 # ✅ Initialize Camera
 cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.11:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+# testing
+# cap = cv2.VideoCapture(0)  # ✅ IP Camera URL
+
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -62,12 +63,15 @@ def read_frames():
 frame_thread = threading.Thread(target=read_frames, daemon=True)
 frame_thread.start()
 
-ARM_CONNECTIONS = frozenset([
-    (mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW),
-    (mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST),
-    (mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW),
-    (mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST),
-])
+low_knee_position = None
+previous_knee_position = None
+data ={
+    "timestamp": None,
+    "angle": None,
+    "status": None,
+    "suggestion": None,
+    "screenshot_path": None
+}
 
 # ✅ Mediapipe Pose Model
 with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
@@ -96,88 +100,113 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         
         try:
-          if results.pose_landmarks:
-            landmarks = results.pose_landmarks.landmark
+            if results.pose_landmarks:  # ✅ Check if pose landmarks are detected
+                landmarks = results.pose_landmarks.landmark
+                
+                # Get coordinates
+                right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                right_elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+                right_wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+                right_hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
+                right_index = [landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value].y]
+                right_knee = [landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value].y]
+                right_ankle = [landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value].y]
+                right_foot_index = [landmarks[mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value].y]
+                right_heel = [landmarks[mp_pose.PoseLandmark.RIGHT_HEEL.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_HEEL.value].y]
+                
+                # Get coordinates for left side                
+                left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+                left_elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+                left_wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+                left_index = [landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].y]
+                left_knee = [landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x, landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
+                left_ankle = [landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].y]
+                left_foot_index = [landmarks[mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value].y]
+                left_heel = [landmarks[mp_pose.PoseLandmark.LEFT_HEEL.value].x, landmarks[mp_pose.PoseLandmark.LEFT_HEEL.value].y]
+                left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x, landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
+               
+                # Calculate angle
+                right_elbow_angle = calculate_angle(right_shoulder, right_elbow, right_wrist)
+                right_arm_angle = calculate_angle(right_hip, right_shoulder, right_elbow)
+                right_wrist_angle = calculate_angle(right_elbow, right_wrist, right_index)
+                right_knee_angle = calculate_angle(right_hip, right_knee, right_ankle)
+                right_ankle_angle = calculate_angle(right_knee, right_ankle, right_foot_index)
+                right_hip_angle = calculate_angle(right_shoulder,right_hip,right_knee)
+                
+                left_ankle_angle = calculate_angle(left_knee, left_ankle, left_foot_index)
+                left_knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
+                left_wrist_angle = calculate_angle(left_elbow, left_wrist, left_index)
+                left_arm_angle = calculate_angle(left_hip, left_shoulder, left_elbow)
+                left_elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
+                left_hip_angle = calculate_angle(left_shoulder,left_hip,left_knee)
+                # TO-Do will remove this later
+                arm_straight_angle = calculate_angle(left_shoulder, right_shoulder, right_elbow)
 
-            # Get required joint positions
-            r_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].x,
-                          landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].y]
-            r_elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW].x,
-                       landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW].y]
-            r_wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].x,
-                       landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].y]
+                angle = "right elbow: " + str(int(right_elbow_angle)) + " left elbow: " + str(int(left_elbow_angle)) + " right shoulder: " + str(int(right_arm_angle)) +" left shoulder: "+ str(int(left_arm_angle))
+                status = "both hands are straight."
+                leg= "no leg up"
+                suggestion = "baju swing" 
+                
+                if(right_elbow_angle >155 and left_elbow_angle > 155 and right_arm_angle >90 and left_arm_angle > 90 ):
+                    suggestion = "baju swing correct"
+                    status = "Correct"
+                    cv2.imwrite(screenshot_path, frame)
 
-            l_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].x,
-                          landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].y]
-            l_elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW].x,
-                       landmarks[mp_pose.PoseLandmark.LEFT_ELBOW].y]
-            l_wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST].x,
-                       landmarks[mp_pose.PoseLandmark.LEFT_WRIST].y]
+                else:
+                    status = "baju swing Wrong"
+                    cv2.imwrite(screenshot_path, frame)
+                    if right_elbow_angle < 155:
+                        suggestion =f"Right hand should be straight [right elbow: {int(right_elbow_angle)}]"
+                    elif left_elbow_angle < 155:
+                        suggestion = f"Left hand should be straight: [left elbow: {int(left_elbow_angle)}]"
+                    elif right_arm_angle > 90:
+                        suggestion = f"Rise Right hand Slowly: [right shoulder: {int(right_arm_angle)}]"
+                
+                if right_arm_angle > 80 or left_arm_angle >80:
+                    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                    screenshot_path = f"static/screenshots/baju_swing_{int(time.time())}.jpg"
 
-            # Calculate angles
-            right_elbow_angle = calculate_angle(r_shoulder, r_elbow, r_wrist)
-            left_elbow_angle = calculate_angle(l_shoulder, l_elbow, l_wrist)
-
-            angle = "right elbow Angle: " + str(int(right_elbow_angle)) + " left elbow Angle: " + str(int(left_elbow_angle)) + " right elbow Angle: "
-            status= "swing your arm"
-
-            # # Display angles
-            cv2.putText(image, f'R Arm: {int(right_elbow_angle)}', 
-                        (250, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            cv2.putText(image, f'L Arm: {int(left_elbow_angle)}', 
-                        (250, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-            # Check correctness of swing
-            if 30 <= right_elbow_angle <= 45 or 15 <= right_elbow_angle <= 25:
-                right_status = "Correct"
-                cv2.putText(image, "Right Arm Swing: Correct", (50, 50), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            else:
-                right_status = "Wrong"
-                cv2.putText(image, "Right Arm Swing: Wrong", (50, 50), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-
-            if 30 <= left_elbow_angle <= 45 or 15 <= left_elbow_angle <= 25:
-                left_status = "Correct"
-                cv2.putText(image, "Left Arm Swing: Correct", (50, 80), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            else:
-                left_status = "Wrong"
-                cv2.putText(image, "Left Arm Swing: Wrong", (50, 80), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-
-            # Save screenshot
-            screenshot_path = f"static/screenshots/swing_{int(current_time)}.jpg"
-            cv2.imwrite(screenshot_path, frame)
-
-            # Insert data into database
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
-            cursor.execute("""
-                INSERT INTO baju_swing_result (timestamp, angle, status, suggestion, screenshot_path)
-                VALUES (?, ?, ?, ?, ?)
-            """, (timestamp, angle, "right:"+right_status+" left:"+left_status, "Adjust your arm swing if needed", screenshot_path))
-            conn.commit()
-
-            # Draw only arms
-            mp_drawing.draw_landmarks(image, results.pose_landmarks, 
-                                      frozenset([
-                                          (mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW),
-                                          (mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST),
-                                          (mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW),
-                                          (mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST),
-                                      ]))
+                    cursor.execute("INSERT INTO baju_swing_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
+                                (timestamp, angle, status, suggestion, screenshot_path))
+                    conn.commit()    
+ # # Visualize angle
+                cv2.putText(image, str(int(right_elbow_angle)), 
+                            tuple(np.multiply(right_elbow, [840, 600]).astype(int)), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                                    )
+                cv2.putText(image, str(int(right_arm_angle)),
+                            tuple(np.multiply(right_shoulder, [840, 600]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                                    )
+                cv2.putText(image, str(int(right_wrist_angle)),
+                            tuple(np.multiply(right_wrist, [840, 600]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                                    )
+                cv2.putText(image, str(int(left_elbow_angle)), 
+                            tuple(np.multiply(left_elbow, [840, 600]).astype(int)), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                                    )
+                cv2.putText(image, str(int(left_arm_angle)),
+                            tuple(np.multiply(left_shoulder, [840, 600]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                                    )
+                cv2.putText(image, str(int(left_wrist_angle)),
+                            tuple(np.multiply(left_wrist, [840, 600]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
+                                    )
+                # Display suggestion on the screen
+                color = (0, 255, 0) if "Correct" in status else (0, 0, 255)
+                cv2.putText(image, f'Suggestion: {suggestion}', (50, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
 
         except Exception as e:
             print(e)
-         # Render detections
-        # mp_drawing.draw_landmarks(
-        #     image, 
-        #     results.pose_landmarks, 
-        #     ARM_CONNECTIONS,  # Custom connections for arms only
-        #     mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
-        #     mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
-        # )
+        # # Render detections
+        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
+                                mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
+                                mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
+                                 )
         # Display on screen
         cv2.imshow('Mediapipe Feed', image)
 
