@@ -5,7 +5,6 @@ import sqlite3
 import time
 import threading
 import queue
-import json  # Add this import for JSON serialization
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -310,34 +309,6 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             low_knee_position = None
                     previous_knee_position = left_hip_angle
 
-                # if high_knee_position >= right_knee_angle:
-                #     high_knee_position = right_knee_angle
-                # elif right_knee_angle > 150 and (right_hip_angle < 130 or left_hip_angle < 130):
-                #     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                #     screenshot_path = f"static/screenshots/kadamtal_{int(time.time())}.jpg"
-                #     cv2.imwrite(screenshot_path, frame)
-
-                    # cursor.execute("INSERT INTO kadamtal_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                    #             (timestamp, angle, status, suggestion, screenshot_path))
-                    # conn.commit()   
-
-
-
-
-                # # ✅ Save Screenshot & Data (Every 1 second)
-                # if int(current_time) - int(last_store_time) >= 1 and 60 <= right_arm_angle <= 150 and 30 <= right_elbow_angle <= 80:
-                #     last_store_time = current_time
-
-                #     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                #     screenshot_path = f"static/screenshots/salute_{int(time.time())}.jpg"
-                #     cv2.imwrite(screenshot_path, frame)
-
-                #     cursor.execute("INSERT INTO results (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                #                    (timestamp, angle, status, suggestion, screenshot_path))
-                #     conn.commit()
-                
-            # else:
-                # print("No pose landmarks detected.")  # ✅ Log when no landmarks are detected
 
         except Exception as e:
             print(e)
@@ -355,6 +326,3 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
 cap.release()
 cv2.destroyAllWindows()
 conn.close()
-
-# ✅ Display the contents of the data variable
-print("Processed Data:", json.dumps(data, indent=4))

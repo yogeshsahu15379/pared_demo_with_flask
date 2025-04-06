@@ -21,6 +21,21 @@ def kadamchal_results():
     conn.close()
     return data
 
+def baju_swing_result():
+    conn = sqlite3.connect("salute_results.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM baju_swing_result ORDER BY id DESC")
+    data = cursor.fetchall()
+    conn.close()
+    return data
+
+def getTejChal_result():
+    conn = sqlite3.connect("salute_results.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tej_chal_result ORDER BY id DESC")
+    data = cursor.fetchall()
+    conn.close()
+    return data
 
 @app.route("/")
 def home():
@@ -64,6 +79,15 @@ def kadamchal_result():
     results = kadamchal_results()
     return render_template("kadamchal_result_page.html", results=results, tracking=bool(tracking_processes))
 
+@app.route("/baju_swing_result")
+def baju_swing():
+    results = baju_swing_result()
+    return render_template("baju_swing_result_page.html", results=results, tracking=bool(tracking_processes))
+
+@app.route("/tejchal_result")
+def tejchal_result():
+    results = getTejChal_result()
+    return render_template("tej_chal_result_page.html", results=results, tracking=bool(tracking_processes))
 
 @app.route("/start_tracking/<mode>")
 def start_tracking(mode):

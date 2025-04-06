@@ -13,7 +13,7 @@ mp_pose = mp.solutions.pose
 conn = sqlite3.connect("salute_results.db", check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS results (
+    CREATE TABLE IF NOT EXISTS tej_chal_result (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT,
         angle REAL,
@@ -248,8 +248,6 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             tuple(np.multiply(left_hip, [840, 600]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
-                
-                
 
                 # # ✅ Save Screenshot & Data (Every 1 second)
                 # if int(current_time) - int(last_store_time) >= 1 and 60 <= right_arm_angle <= 150 and 30 <= right_elbow_angle <= 80:

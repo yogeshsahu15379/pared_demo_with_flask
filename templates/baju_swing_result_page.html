@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baju Swing  Results</title>
+    <script>
+        // setTimeout(() => { location.reload(); }, 3000);  // Auto-refresh every 3s
+    </script>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 10px;
+                text-align: center;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            img {
+                width: 200px;
+                height: auto;
+            }
+            .correct {
+                color: green;
+                font-weight: bold;
+            }
+            .wrong {
+                color: red;
+                font-weight: bold;
+            }
+        </style>
+</head>
+<body>
+    <h1>Baju Swing results</h1>
+<button onclick="location.reload()">Refresh Results</button>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Date & Time</th>
+        <th>Angle</th>
+        <th>Status</th>
+        <th>Suggestion</th>
+        <th>Screenshot</th>
+    </tr>
+    {% for result in results %}
+    <tr>
+        <td>{{ result[0] }}</td>
+        <td>{{ result[1] }}</td>
+        <td>{{ result[2] }}</td>
+        <td class="{% if 'correct' in result[3]|lower %}correct{% else %}wrong{% endif %}">
+            {{ result[3] }}
+        </td>
+        <td>{{ result[4] }}</td>
+        <td><img src="{{ result[5] }}"></td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
+
