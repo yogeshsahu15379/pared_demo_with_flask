@@ -29,6 +29,14 @@ def baju_swing_result():
     conn.close()
     return data
 
+def get_hill_march_result():
+    conn = sqlite3.connect("salute_results.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM hill_march_result ORDER BY id DESC")
+    data = cursor.fetchall()
+    conn.close()
+    return data
+
 def getTejChal_result():
     conn = sqlite3.connect("salute_results.db")
     cursor = conn.cursor()
@@ -88,6 +96,11 @@ def baju_swing():
 def tejchal_result():
     results = getTejChal_result()
     return render_template("tej_chal_result_page.html", results=results, tracking=bool(tracking_processes))
+
+@app.route("/hill_march_result")
+def hill_march_result():
+    results = get_hill_march_result()
+    return render_template("hill_march_result_page.html", results=results, tracking=bool(tracking_processes))
 
 @app.route("/start_tracking/<mode>")
 def start_tracking(mode):

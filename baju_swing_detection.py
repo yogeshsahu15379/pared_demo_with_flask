@@ -38,7 +38,7 @@ def calculate_angle(a, b, c):
     return angle 
 # rtsp://192.168.0.11:554/1/1?transmode=unicast&profile=va
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.11:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
 # testing
 # cap = cv2.VideoCapture(0)  # ✅ IP Camera URL
 
@@ -150,22 +150,22 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 if(right_elbow_angle >155 and left_elbow_angle > 155 and right_arm_angle >90 and left_arm_angle > 90 ):
                     suggestion = "baju swing correct"
                     status = "Correct"
-                    cv2.imwrite(screenshot_path, frame)
 
                 else:
                     status = "baju swing Wrong"
-                    cv2.imwrite(screenshot_path, frame)
                     if right_elbow_angle < 155:
                         suggestion =f"Right hand should be straight [right elbow: {int(right_elbow_angle)}]"
                     elif left_elbow_angle < 155:
                         suggestion = f"Left hand should be straight: [left elbow: {int(left_elbow_angle)}]"
                     elif right_arm_angle > 90:
                         suggestion = f"Rise Right hand Slowly: [right shoulder: {int(right_arm_angle)}]"
+                    elif left_arm_angle > 90:
+                        suggestion = f"Rise Left hand Slowly: [left shoulder: {int(left_arm_angle)}]"
                 
                 if right_arm_angle > 80 or left_arm_angle >80:
                     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
                     screenshot_path = f"static/screenshots/baju_swing_{int(time.time())}.jpg"
-
+                    cv2.imwrite(screenshot_path, frame)
                     cursor.execute("INSERT INTO baju_swing_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
                                 (timestamp, angle, status, suggestion, screenshot_path))
                     conn.commit()    
