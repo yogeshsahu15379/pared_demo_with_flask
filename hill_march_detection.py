@@ -31,32 +31,20 @@ def calculate_angle(a, b, c):
     angle = np.arccos(np.dot(ab, cb) / (np.linalg.norm(ab) * np.linalg.norm(cb)))
     return np.degrees(angle)
 
-def calculate_angle_2d(a, b, c):
-    a = np.array(a)
-    b = np.array(b)
-    c = np.array(c)
-    
-    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
-    angle = np.abs(radians * 180.0 / np.pi)
-    if angle > 180.0:
-        angle = 360.0 - angle
-        
-    return angle 
-
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:Admin@123@192.168.0.14:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
-# cap = cv2.VideoCapture(0)  # ✅ Webcam
+cap = cv2.VideoCapture("rtsp://admin:Admin@123@192.168.0.14:554/1/1?transportmode=unicast&profile=va")
+# cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 frame_queue = queue.Queue()
 frame_skip = 2
 frame_count = 0
 Z_THRESHOLD = -0.2
-prev_leg = None
+leg_in_air = False  # ✅ Initial leg state
 
-# ✅ Multi-threading for reading frames
+# ✅ Multi-threaded frame reader
 def read_frames():
     while cap.isOpened():
         ret, frame = cap.read()
@@ -94,20 +82,20 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 def get_landmark_points(landmark):
                     return [landmark.x, landmark.y, landmark.z], (int(landmark.x * w), int(landmark.y * h))
 
+                # Left side points
                 left_hip, lh_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.LEFT_HIP])
                 left_knee, lk_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.LEFT_KNEE])
                 left_ankle, la_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE])
 
+                # Right side points
                 right_hip, rh_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.RIGHT_HIP])
                 right_knee, rk_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.RIGHT_KNEE])
                 right_ankle, ra_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE])
 
-                # ✅ Check Z-depth for leg raise
                 left_z = left_ankle[2]
                 right_z = right_ankle[2]
 
- # ✅ Show angles on both sides always
-                # Left
+                # ✅ Show angles
                 left_hip_angle = calculate_angle([lh_pos[0], lh_pos[1]], [lk_pos[0], lk_pos[1]], [la_pos[0], la_pos[1]])
                 left_knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
                 left_ankle_angle = calculate_angle(left_knee, left_ankle, [left_ankle[0], left_ankle[1] + 0.1, left_ankle[2]])
@@ -115,7 +103,6 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 cv2.putText(image, f"{left_knee_angle:.1f}", lk_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
                 cv2.putText(image, f"{left_ankle_angle:.1f}", la_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
 
-                # Right
                 right_hip_angle = calculate_angle([rh_pos[0], rh_pos[1]], [rk_pos[0], rk_pos[1]], [ra_pos[0], ra_pos[1]])
                 right_knee_angle = calculate_angle(right_hip, right_knee, right_ankle)
                 right_ankle_angle = calculate_angle(right_knee, right_ankle, [right_ankle[0], right_ankle[1] + 0.1, right_ankle[2]])
@@ -123,44 +110,45 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 cv2.putText(image, f"{right_knee_angle:.1f}", rk_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
                 cv2.putText(image, f"{right_ankle_angle:.1f}", ra_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
 
+                # ✅ Logic to detect topmost point (store only once)
                 leg_raised = None
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                screenshot_path = f"static/screenshots/baju_swing_{int(time.time())}.jpg"
-                status = "kadam tal wrong"
+                screenshot_path = f"static/screenshots/hill_march_{int(time.time())}.jpg"
+                status = "Hill march wrong"
                 suggestion = "Please raise your leg higher."
-                angle =f"left_z: {left_z} | Right_z: {right_z} | left_hip_angle: {left_hip_angle:.1f} | left_knee_angle: {left_knee_angle:.1f} | left_ankle_angle: {left_ankle_angle:.1f} | right_hip_angle: {right_hip_angle:.1f} | right_knee_angle: {right_knee_angle:.1f} | right_ankle_angle: {right_ankle_angle:.1f}"
-                # ✅ Check if leg is raised correctly
-                if left_z < Z_THRESHOLD :
-                    status = "left leg Correct"
-                    suggestion = "Left leg raised correctly."
-                    cv2.imwrite(screenshot_path, frame)
-                    cursor.execute("INSERT INTO hill_march_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                                (timestamp, angle, status, suggestion, screenshot_path))
-                    conn.commit()   
-                    leg_raised = "left"
-                    prev_leg = "left"
-                elif right_z < Z_THRESHOLD :
-                    status = "right leg Correct"
-                    suggestion = "Right leg raised correctly."
-                    cv2.imwrite(screenshot_path, frame)
-                    cursor.execute("INSERT INTO hill_march_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                                (timestamp, angle, status, suggestion, screenshot_path))
-                    conn.commit()  
-                    leg_raised = "right"
-                    prev_leg = "right"
+                angle = f"left_z: {left_z} | Right_z: {right_z} | left_hip_angle: {left_hip_angle:.1f} | left_knee_angle: {left_knee_angle:.1f} | left_ankle_angle: {left_ankle_angle:.1f} | right_hip_angle: {right_hip_angle:.1f} | right_knee_angle: {right_knee_angle:.1f} | right_ankle_angle: {right_ankle_angle:.1f}"
 
-                # ✅ Display Z index and leg raised info on screen
+                # ✅ Capture data only at top point
+                if not leg_in_air and (left_z < Z_THRESHOLD or right_z < Z_THRESHOLD):
+                    if left_z < Z_THRESHOLD:
+                        status = "Left leg Correct"
+                        suggestion = "Left leg raised correctly."
+                        leg_raised = "left"
+                    elif right_z < Z_THRESHOLD:
+                        status = "Right leg Correct"
+                        suggestion = "Right leg raised correctly."
+                        leg_raised = "right"
+
+                    cv2.imwrite(screenshot_path, frame)
+                    cursor.execute("INSERT INTO hill_march_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
+                                    (timestamp, angle, status, suggestion, screenshot_path))
+                    conn.commit()
+                    leg_in_air = True  # Don't allow next capture until leg comes down
+
+                # ✅ Reset only when leg is down again
+                if left_z >= Z_THRESHOLD and right_z >= Z_THRESHOLD:
+                    leg_in_air = False
+
+                # ✅ Display Z values & leg info
                 z_info = f"Left Z: {left_z:.2f} | Right Z: {right_z:.2f}"
                 cv2.putText(image, z_info, (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 100, 100), 2)
                 if leg_raised:
                     cv2.putText(image, f"Leg Raised: {leg_raised.upper()}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 255, 100), 2)
 
-               
-
                 mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
         except Exception as e:
-            print(e)
+            print("Error:", e)
 
         cv2.imshow('Mediapipe Feed', image)
 

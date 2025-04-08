@@ -40,7 +40,7 @@ def get_hill_march_result():
 def getTejChal_result():
     conn = sqlite3.connect("salute_results.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tej_chal_result ORDER BY id DESC")
+    cursor.execute("SELECT * FROM tej_march_result ORDER BY id DESC")
     data = cursor.fetchall()
     conn.close()
     return data
