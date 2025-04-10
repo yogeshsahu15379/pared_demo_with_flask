@@ -38,7 +38,7 @@ def calculate_angle(a, b, c):
     return angle 
 
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:Admin@123@192.168.0.11:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/1?transportmode=unicast&profile=va")  # ✅ IP Camera URL
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -67,7 +67,7 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
             continue
 
         frame = frame_queue.get()
-        frame = cv2.resize(frame, (640, 480))  # ✅ Resize frame for performance
+        frame = cv2.resize(frame, (840, 600))  # ✅ Resize frame for performance
 
         frame_count += 1
         if frame_count % frame_skip != 0:
@@ -75,17 +75,26 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
         
         current_time = time.time()
         
-        # Recolor image to RGB
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image.flags.writeable = False
-      
-        # Make detection
-        results = pose.process(image)
-    
-        # Recolor back to BGR
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        
+        # ✅ Center Calculation
+        h, w, _ = frame.shape
+        cx, cy = w // 2, h // 2
+        roi_width, roi_height = 250, 600
+        x1 = max(0, cx - roi_width // 2)
+        y1 = max(0, cy - roi_height // 2)
+        x2 = min(w, cx + roi_width // 2)
+        y2 = min(h, cy + roi_height // 2)
+
+        # ✅ Extract Centered ROI
+        centered_image = frame[y1:y2, x1:x2]
+        image = frame[y1:y2, x1:x2]
+
+        # ✅ Convert ROI to RGB for MediaPipe
+        roi_rgb = cv2.cvtColor(centered_image, cv2.COLOR_BGR2RGB)
+        roi_rgb.flags.writeable = False
+        results = pose.process(roi_rgb)
+        roi_rgb.flags.writeable = True
+        centered_image = cv2.cvtColor(roi_rgb, cv2.COLOR_RGB2BGR)
+
         try:
             if results.pose_landmarks: 
                 landmarks = results.pose_landmarks.landmark
@@ -102,72 +111,67 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
                 elbow_angle = calculate_angle(shoulder, elbow, wrist)
                 arm_angle = calculate_angle(hip, shoulder, elbow)
                 wrist_angle = calculate_angle(elbow, wrist, right_index)
-                arm_straight_angle = calculate_angle(left_shoulder,shoulder,elbow)
+                arm_straight_angle = calculate_angle(left_shoulder, shoulder, elbow)
 
                 angle = "Elbow Angle: " + str(int(elbow_angle)) + " Arm Angle: " + str(int(arm_angle)) + " Wrist Angle: " + str(int(wrist_angle))
                 status = "Salute is wrong"
 
                 # Determine suggestion based on arm_angle
-                if 85 <= arm_angle <= 125 and 47 <= elbow_angle <= 75 and 135 <= wrist_angle <= 170:
+                if 85 <= arm_angle <= 120 and 20 <= elbow_angle <= 30 and 168 <= wrist_angle <= 180:
                     suggestion = "Perfect position"
                     status = "Salute is Correct"
                 elif arm_angle < 85:
                     suggestion = "Raise arm slowly [" + str(int(arm_angle)) + "]"
-                elif arm_angle > 125:
+                elif arm_angle > 120:
                     suggestion = "Lower arm slowly [" + str(int(arm_angle)) + "]"
-                elif elbow_angle < 47:
+                elif elbow_angle < 20:
                     suggestion = "Raise elbow slightly [" + str(int(elbow_angle)) + "]"
-                elif elbow_angle > 75:
+                elif elbow_angle > 30:
                     suggestion = "Lower elbow slightly [" + str(int(elbow_angle)) + "]"
-                elif wrist_angle < 135:
+                elif wrist_angle < 168:
                     suggestion = "Raise wrist slightly [" + str(int(wrist_angle)) + "]"
-                elif wrist_angle > 170:
+                elif wrist_angle > 180:
                     suggestion = "Lower wrist slightly [" + str(int(wrist_angle)) + "]"
 
                 # Display suggestion on the screen
                 color = (0, 255, 0) if "Correct" in status else (0, 0, 255)
-                cv2.putText(image, f'Suggestion: {suggestion}', (50, 50),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-                
-                # # Visualize angle
-                cv2.putText(image, str(int(elbow_angle)), 
-                            tuple(np.multiply(elbow, [640, 480]).astype(int)), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(arm_angle)),
-                            tuple(np.multiply(shoulder, [640, 480]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(wrist_angle)),
-                            tuple(np.multiply(wrist, [640, 480]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
-                cv2.putText(image, str(int(arm_straight_angle)),
-                            tuple(np.multiply(left_shoulder, [640, 480]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
-                                    )
+                cv2.putText(centered_image, f'Suggestion: {suggestion}', (10, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+
+                # Visualize angles
+                cv2.putText(centered_image, str(int(elbow_angle)), 
+                            tuple(np.multiply(elbow, [roi_width, roi_height]).astype(int)), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(centered_image, str(int(arm_angle)),
+                            tuple(np.multiply(shoulder, [roi_width, roi_height]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(centered_image, str(int(wrist_angle)),
+                            tuple(np.multiply(wrist, [roi_width, roi_height]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(centered_image, str(int(arm_straight_angle)),
+                            tuple(np.multiply(left_shoulder, [roi_width, roi_height]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2, cv2.LINE_AA)
 
                 # ✅ Save Screenshot & Data (Every 1 second)
-                if int(current_time) - int(last_store_time) >= 1 and 60 <= arm_angle <= 150 and 30 <= elbow_angle <= 80:
+                if int(current_time) - int(last_store_time) >= 1 and 80 <= arm_angle <= 150 and 15 <= elbow_angle <= 40:
                     last_store_time = current_time
 
                     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                    screenshot_path = f"static/screenshots/salute_{int(time.time())}.jpg"
-                    cv2.imwrite(screenshot_path, frame)
+                    centered_image_path = f"static/screenshots/centered_salute_{int(time.time())}.jpg"
+
+                    # Save screenshot without suggestion
+                    screenshot_without_text = centered_image.copy()
+                    cv2.imwrite(centered_image_path, image)
 
                     cursor.execute("INSERT INTO results (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                                (timestamp, angle, status, suggestion, screenshot_path))
-                    conn.commit()        
+                                (timestamp, angle, status, suggestion, centered_image_path))
+                    conn.commit()
 
         except Exception as e:
             print(e)
-        # # Render detections
-        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
-                                mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
-                                 )
-        # Display on screen
-        cv2.imshow('Mediapipe Feed', image)
+
+        # ✅ Display centered image
+        cv2.imshow('Centered ROI Analysis', centered_image)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # ✅ Reduced delay for smoother video
             break
