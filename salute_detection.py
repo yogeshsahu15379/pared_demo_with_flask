@@ -38,7 +38,7 @@ def calculate_angle(a, b, c):
     return angle 
 
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/1?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.14:554/1/1?transportmode=unicast&profile=vam")  # ✅ IP Camera URL
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -171,7 +171,7 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
             print(e)
 
         # ✅ Display centered image
-        cv2.imshow('Centered ROI Analysis', centered_image)
+        cv2.imshow('Salute', centered_image)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # ✅ Reduced delay for smoother video
             break

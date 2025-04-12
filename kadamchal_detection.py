@@ -38,13 +38,13 @@ def calculate_angle(a, b, c):
     return angle 
 # rtsp://192.168.0.11:554/1/1?transmode=unicast&profile=va
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:Admin@123@192.168.0.16:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/1?transportmode=unicast&profile=vam")  # ✅ IP Camera URL
 # testing
 # cap = cv2.VideoCapture(0)  # ✅ IP Camera URL
 
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  
 
 frame_queue = queue.Queue()  # ✅ Queue for multi-threading
@@ -81,7 +81,11 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
 
         frame = frame_queue.get()
         frame = cv2.resize(frame, (840, 600))  # ✅ Resize frame for performance
-
+        crop_width = 300  # You can change this to desired cropped width
+        frame_height, frame_width, _ = frame.shape
+        start_x = (frame_width - crop_width) // 2
+        end_x = start_x + crop_width
+        frame = frame[:, start_x:end_x]
         frame_count += 1
         if frame_count % frame_skip != 0:
             continue  # ✅ Skip alternate frames to improve performance
@@ -153,39 +157,39 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
 
                     # # Visualize angle
                     cv2.putText(image, str(int(right_elbow_angle)), 
-                                tuple(np.multiply(right_elbow, [840, 600]).astype(int)), 
+                                tuple(np.multiply(right_elbow, [300, 600]).astype(int)), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     cv2.putText(image, str(int(right_arm_angle)),
-                                tuple(np.multiply(right_shoulder, [840, 600]).astype(int)),
+                                tuple(np.multiply(right_shoulder, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     cv2.putText(image, str(int(right_wrist_angle)),
-                                tuple(np.multiply(right_wrist, [840, 600]).astype(int)),
+                                tuple(np.multiply(right_wrist, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     
                     cv2.putText(image, str(int(right_knee_angle)),
-                                tuple(np.multiply(right_knee, [840, 600]).astype(int)),
+                                tuple(np.multiply(right_knee, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     
                     cv2.putText(image, str(int(right_hip_angle)),
-                                tuple(np.multiply(right_hip, [840, 600]).astype(int)),
+                                tuple(np.multiply(right_hip, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     
                     cv2.putText(image, str(int(right_ankle_angle)),
-                                tuple(np.multiply(right_ankle, [840, 600]).astype(int)),
+                                tuple(np.multiply(right_ankle, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
 
-                    if right_hip_angle < 80 and right_ankle_angle < 115 and 55<= right_knee_angle <= 100 and 150 <= right_elbow_angle <= 180 and 170 <= right_wrist_angle <= 180:
+                    if right_hip_angle < 130 and right_ankle_angle < 115 and 55<= right_knee_angle <= 100 and 150 <= right_elbow_angle <= 180:
                         suggestion = "Perfect Right Leg Up Position"
                         status = "right kadam is Correct"
                     else:
                         status = "right kadam is wrong"
-                        if right_hip_angle > 80:
+                        if right_hip_angle > 130:
                             suggestion = f"rise your right leg [right_hip_angle : {int(right_hip_angle)}]"
                         elif right_ankle_angle > 115:
                             suggestion = f"rise your right foot [right_ankle_angle: {int(right_ankle_angle)}] "
@@ -195,49 +199,49 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             suggestion = f"move your right leg backward [right_knee_angle: {int(right_knee_angle)}]"
                         elif right_elbow_angle < 150:
                             suggestion = f"Straighten right elbow slightly [right_elbow_angle: {int(right_elbow_angle)}]"
-                        elif right_wrist_angle < 170:
-                            suggestion = f"Straighten Right Wrist [right_wrist_angle: {int(right_wrist_angle)}]"
+                        # elif right_wrist_angle < 170:
+                        #     suggestion = f"Straighten Right Wrist [right_wrist_angle: {int(right_wrist_angle)}]"
                     
                 elif left_knee_angle < 150 and right_knee_angle > 170:
                     leg= "left"
                     angle = "right knee Angle: " + str(int(right_knee_angle)) + " left knee Angle: " + str(int(left_knee_angle)) + " right elbow Angle: " + str(int(right_elbow_angle)) + " left elbow Angle: " + str(int(left_elbow_angle)) + "right hip Angle: " + str(int(right_hip_angle)) + " left hip Angle: " + str(int(left_hip_angle)) + " right ankle Angle: " + str(int(right_ankle_angle)) + " left ankle Angle: " + str(int(left_ankle_angle))
 
                     cv2.putText(image,str(int(left_ankle_angle)),
-                                tuple(np.multiply(left_ankle, [840, 600]).astype(int)),
+                                tuple(np.multiply(left_ankle, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     cv2.putText(image, str(int(left_elbow_angle)), 
-                                tuple(np.multiply(left_elbow, [840, 600]).astype(int)), 
+                                tuple(np.multiply(left_elbow, [300, 600]).astype(int)), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     cv2.putText(image, str(int(left_arm_angle)),
-                                tuple(np.multiply(left_shoulder, [840, 600]).astype(int)),
+                                tuple(np.multiply(left_shoulder, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     cv2.putText(image, str(int(left_wrist_angle)),
-                                tuple(np.multiply(left_wrist, [840, 600]).astype(int)),
+                                tuple(np.multiply(left_wrist, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     cv2.putText(image, str(int(left_knee_angle)),
-                                tuple(np.multiply(left_knee, [840, 600]).astype(int)),
+                                tuple(np.multiply(left_knee, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     cv2.putText(image, str(int(left_elbow_angle)),
-                                tuple(np.multiply(left_elbow, [840, 600]).astype(int)),
+                                tuple(np.multiply(left_elbow, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     
                     cv2.putText(image, str(int(left_hip_angle)),
-                                tuple(np.multiply(left_hip, [840, 600]).astype(int)),
+                                tuple(np.multiply(left_hip, [300, 600]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                         )
                     
-                    if left_hip_angle < 80 and left_ankle_angle < 115 and 55<= left_knee_angle <= 100 and 150 <= left_elbow_angle <= 180 and 170 <= left_wrist_angle <= 180:
+                    if left_hip_angle < 130 and left_ankle_angle < 115 and 55<= left_knee_angle <= 100 and 150 <= left_elbow_angle <= 180:
                         suggestion = "Perfect left Leg Up Position"
                         status = "left kadam is Correct"
                     else:
                         status = "left kadam is wrong"
-                        if left_hip_angle > 80:
+                        if left_hip_angle > 130:
                             suggestion = f"rise your left leg [left_hip_angle: {int(left_hip_angle)}]"
                         elif left_ankle_angle > 115:
                             suggestion = f"rise your left foot [left_ankle_angle :{int(left_ankle_angle)}]"
@@ -247,8 +251,8 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                             suggestion = f"move your left leg backward [left_knee_angle: {int(left_knee_angle)}]"
                         elif left_elbow_angle < 150:
                             suggestion = f"Straighten left elbow slightly [left_elbow_angle: {int(left_elbow_angle)}]"
-                        elif left_wrist_angle < 170:
-                            suggestion = f"Left wrist should be straight  [left_wrist_angle :{int(left_wrist_angle)}]"
+                        # elif left_wrist_angle < 170:
+                        #     suggestion = f"Left wrist should be straight  [left_wrist_angle :{int(left_wrist_angle)}]"
 
                 else:
                     suggestion = "Invalid state: Both legs are either up or grounded."
@@ -309,7 +313,7 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                                 mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
                                  )
         # Display on screen
-        cv2.imshow('Mediapipe Feed', image)
+        cv2.imshow('Kadam tal', image)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # ✅ Reduced delay for smoother video
             break

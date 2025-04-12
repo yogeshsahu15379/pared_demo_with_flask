@@ -44,7 +44,7 @@ def calculate_angle_2d(a, b, c):
     return angle 
 
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:Admin@123@192.168.0.14:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.11:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -75,6 +75,11 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
 
         frame = frame_queue.get()
         frame = cv2.resize(frame, (840, 600))
+        crop_width = 300  # You can change this to desired cropped width
+        frame_height, frame_width, _ = frame.shape
+        start_x = (frame_width - crop_width) // 2
+        end_x = start_x + crop_width
+        frame = frame[:, start_x:end_x]
         h, w, _ = frame.shape
 
         frame_count += 1

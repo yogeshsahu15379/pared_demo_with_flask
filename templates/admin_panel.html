@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIDN | Admin panel</title>
+    <link rel="stylesheet" href="../static/style.css" />
+  </head>
+  <body>
+    <div class="admin_panel_container">
+      <h1> Admin Control Panel </h1>
+      <div class="grid_container">
+        <div class="control_panel">
+          <div>
+            <h3>Salute</h3>
+            <button type="button" class="btn start" onclick="startTracking('salute')">
+              Start Tracking
+            </button>
+            <button type="button" class="btn stop" onclick="stopTracking('salute')">
+              Stop Tracking
+            </button>
+            <a href="/result"
+              ><button type="button" class="btn result">View Result</button></a
+            >
+          </div>
+        </div>
+        <div class="control_panel">
+          <div>
+            <h3>Kadam Tal</h3>
+            <button type="button" class="btn start" onclick="startTracking('kadamchal')">
+              Start Tracking
+            </button>
+            <button type="button" class="btn stop" onclick="stopTracking('kadamchal')">
+              Stop Tracking
+            </button>
+            <a href="/kadamchal_result"
+              ><button type="button" class="btn result">View Result</button></a
+            >
+          </div>
+        </div>
+        <div class="control_panel">
+          <div>
+            <h3>Baju Swing</h3>
+            <button type="button" class="btn start" onclick="startTracking('baju_swing_1')">
+              Start Tracking
+            </button>
+            <button type="button" class="btn stop" onclick="stopTracking('baju_swing_1')">
+              Stop Tracking
+            </button>
+            <a href="/baju_swing_result"
+              ><button type="button" class="btn result">View Result</button></a
+            >
+          </div>
+        </div>
+        <div class="control_panel">
+          <div>
+            <h3>Tej-Chal</h3>
+            <button type="button" class="btn start" onclick="startTracking('tejchal')">
+              Start Tracking
+            </button>
+            <button type="button" class="btn stop" onclick="stopTracking('tejchal')">
+              Stop Tracking
+            </button>
+            <a href="/tejchal_result"
+              ><button type="button" class="btn result">View Result</button></a
+            >
+          </div>
+        </div>
+        <div class="control_panel">
+          <div>
+            <h3>Slow-Chal</h3>
+            <button type="button" class="btn start" onclick="startTracking('slowmarch')">
+              Start Tracking
+            </button>
+            <button type="button" class="btn stop" onclick="stopTracking('slowmarch')">
+              Stop Tracking
+            </button>
+            <a href="/baju_swing_result"
+              ><button type="button" class="btn result">View Result</button></a
+            >
+          </div>
+        </div>
+        <div class="control_panel">
+          <div>
+            <h3>Hill March</h3>
+            <button type="button" class="btn start" onclick="startTracking('hillmarch')">
+              Start Tracking
+            </button>
+            <button type="button" class="btn stop" onclick="stopTracking('hillmarch')">
+              Stop Tracking
+            </button>
+            <a href="/hill_march_result"
+              ><button type="button" class="btn result">View Result</button></a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        function startTracking(path) {
+          fetch(`/start_tracking/${path}`)
+            .then((response) => response.json())
+            .then((data) => alert(data.status));
+        }
+        function stopTracking(path) {
+          fetch(`/stop_tracking/${path}`)
+            .then((response) => response.json())
+            .then((data) => alert(data.status));
+        }
+      </script>
+
+  </body>
+</html>

@@ -38,7 +38,7 @@ def calculate_angle(a, b, c):
     return angle 
 # rtsp://192.168.0.11:554/1/1?transmode=unicast&profile=va
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.12:554/1/1?transportmode=unicast&profile=va")  # ✅ IP Camera URL
 # testing
 # cap = cv2.VideoCapture(0)  # ✅ IP Camera URL
 
@@ -81,6 +81,12 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
 
         frame = frame_queue.get()
         frame = cv2.resize(frame, (840, 600))  # ✅ Resize frame for performance
+
+        crop_width = 300  # You can change this to desired cropped width
+        frame_height, frame_width, _ = frame.shape
+        start_x = (frame_width - crop_width) // 2
+        end_x = start_x + crop_width
+        frame = frame[:, start_x:end_x]
 
         frame_count += 1
         if frame_count % frame_skip != 0:
@@ -171,27 +177,27 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                     conn.commit()    
  # # Visualize angle
                 cv2.putText(image, str(int(right_elbow_angle)), 
-                            tuple(np.multiply(right_elbow, [840, 600]).astype(int)), 
+                            tuple(np.multiply(right_elbow, [300, 600]).astype(int)), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
                 cv2.putText(image, str(int(right_arm_angle)),
-                            tuple(np.multiply(right_shoulder, [840, 600]).astype(int)),
+                            tuple(np.multiply(right_shoulder, [300, 600]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
                 cv2.putText(image, str(int(right_wrist_angle)),
-                            tuple(np.multiply(right_wrist, [840, 600]).astype(int)),
+                            tuple(np.multiply(right_wrist, [300, 600]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
                 cv2.putText(image, str(int(left_elbow_angle)), 
-                            tuple(np.multiply(left_elbow, [840, 600]).astype(int)), 
+                            tuple(np.multiply(left_elbow, [300, 600]).astype(int)), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
                 cv2.putText(image, str(int(left_arm_angle)),
-                            tuple(np.multiply(left_shoulder, [840, 600]).astype(int)),
+                            tuple(np.multiply(left_shoulder, [300, 600]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
                 cv2.putText(image, str(int(left_wrist_angle)),
-                            tuple(np.multiply(left_wrist, [840, 600]).astype(int)),
+                            tuple(np.multiply(left_wrist, [300, 600]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2, cv2.LINE_AA
                                     )
                 # Display suggestion on the screen

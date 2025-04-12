@@ -32,8 +32,7 @@ def calculate_angle(a, b, c):
     return np.degrees(angle)
 
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:Admin@123@192.168.0.14:554/1/1?transportmode=unicast&profile=va")
-# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.11:554/1/2?transportmode=unicast&profile=va")  # ✅ IP Camera URL
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -42,9 +41,8 @@ frame_queue = queue.Queue()
 frame_skip = 2
 frame_count = 0
 Z_THRESHOLD = -0.2
-leg_in_air = False  # ✅ Initial leg state
+leg_in_air = False
 
-# ✅ Multi-threaded frame reader
 def read_frames():
     while cap.isOpened():
         ret, frame = cap.read()
@@ -64,30 +62,46 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
         frame = frame_queue.get()
         frame = cv2.resize(frame, (840, 600))
         h, w, _ = frame.shape
-
         frame_count += 1
         if frame_count % frame_skip != 0:
             continue
 
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image.flags.writeable = False
-        results = pose.process(image)
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        # ✅ Center Calculation
+        cx, cy = w // 2, h // 2
+        roi_width, roi_height = 300, 600
+        x1 = max(0, cx - roi_width // 2)
+        y1 = max(0, cy - roi_height // 2)
+        x2 = min(w, cx + roi_width // 2)
+        y2 = min(h, cy + roi_height // 2)
+
+        # ✅ Draw Center and ROI on Original Frame
+        frame_display = frame.copy()
+        cv2.line(frame_display, (cx - 20, cy), (cx + 20, cy), (0, 255, 0), 2)  # Center +
+        cv2.line(frame_display, (cx, cy - 20), (cx, cy + 20), (0, 255, 0), 2)
+        cv2.rectangle(frame_display, (x1, y1), (x2, y2), (255, 0, 0), 2)       # ROI Box
+
+        # ✅ Extract ROI and send to MediaPipe
+        roi = frame[y1:y2, x1:x2]
+        roi_rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
+        roi_rgb.flags.writeable = False
+        results = pose.process(roi_rgb)
+        roi_rgb.flags.writeable = True
+        image = cv2.cvtColor(roi_rgb, cv2.COLOR_RGB2BGR)
 
         try:
             if results.pose_landmarks:
                 landmarks = results.pose_landmarks.landmark
 
                 def get_landmark_points(landmark):
-                    return [landmark.x, landmark.y, landmark.z], (int(landmark.x * w), int(landmark.y * h))
+                    return [landmark.x, landmark.y, landmark.z], (
+                        int(landmark.x * roi.shape[1]),
+                        int(landmark.y * roi.shape[0])
+                    )
 
-                # Left side points
+                # Get joint positions and angles
                 left_hip, lh_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.LEFT_HIP])
                 left_knee, lk_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.LEFT_KNEE])
                 left_ankle, la_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE])
-
-                # Right side points
                 right_hip, rh_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.RIGHT_HIP])
                 right_knee, rk_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.RIGHT_KNEE])
                 right_ankle, ra_pos = get_landmark_points(landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE])
@@ -95,22 +109,21 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 left_z = left_ankle[2]
                 right_z = right_ankle[2]
 
-                # ✅ Show angles
                 left_hip_angle = calculate_angle([lh_pos[0], lh_pos[1]], [lk_pos[0], lk_pos[1]], [la_pos[0], la_pos[1]])
                 left_knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
                 left_ankle_angle = calculate_angle(left_knee, left_ankle, [left_ankle[0], left_ankle[1] + 0.1, left_ankle[2]])
-                cv2.putText(image, f"{left_hip_angle:.1f}", lh_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
-                cv2.putText(image, f"{left_knee_angle:.1f}", lk_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
-                cv2.putText(image, f"{left_ankle_angle:.1f}", la_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
 
                 right_hip_angle = calculate_angle([rh_pos[0], rh_pos[1]], [rk_pos[0], rk_pos[1]], [ra_pos[0], ra_pos[1]])
                 right_knee_angle = calculate_angle(right_hip, right_knee, right_ankle)
                 right_ankle_angle = calculate_angle(right_knee, right_ankle, [right_ankle[0], right_ankle[1] + 0.1, right_ankle[2]])
-                cv2.putText(image, f"{right_hip_angle:.1f}", rh_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
-                cv2.putText(image, f"{right_knee_angle:.1f}", rk_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
-                cv2.putText(image, f"{right_ankle_angle:.1f}", ra_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,255), 2)
 
-                # ✅ Logic to detect topmost point (store only once)
+                # ✅ Draw angles at joints
+                for point, angle in zip([lh_pos, lk_pos, la_pos, rh_pos, rk_pos, ra_pos],
+                                        [left_hip_angle, left_knee_angle, left_ankle_angle,
+                                        right_hip_angle, right_knee_angle, right_ankle_angle]):
+                    cv2.putText(image, f"{angle:.1f}", point, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
+
+                # ✅ Determine suggestion & status
                 leg_raised = None
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
                 screenshot_path = f"static/screenshots/hill_march_{int(time.time())}.jpg"
@@ -118,7 +131,6 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 suggestion = "Please raise your leg higher."
                 angle = f"left_z: {left_z} | Right_z: {right_z} | left_hip_angle: {left_hip_angle:.1f} | left_knee_angle: {left_knee_angle:.1f} | left_ankle_angle: {left_ankle_angle:.1f} | right_hip_angle: {right_hip_angle:.1f} | right_knee_angle: {right_knee_angle:.1f} | right_ankle_angle: {right_ankle_angle:.1f}"
 
-                # ✅ Capture data only at top point
                 if not leg_in_air and (left_z < Z_THRESHOLD or right_z < Z_THRESHOLD):
                     if left_z < Z_THRESHOLD:
                         status = "Left leg Correct"
@@ -129,28 +141,35 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                         suggestion = "Right leg raised correctly."
                         leg_raised = "right"
 
-                    cv2.imwrite(screenshot_path, frame)
+                    # ✅ Save to DB and Screenshot
+                    cv2.imwrite(screenshot_path, roi)
                     cursor.execute("INSERT INTO hill_march_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                                    (timestamp, angle, status, suggestion, screenshot_path))
+                                (timestamp, angle, status, suggestion, screenshot_path))
                     conn.commit()
-                    leg_in_air = True  # Don't allow next capture until leg comes down
+                    leg_in_air = True
 
-                # ✅ Reset only when leg is down again
+                # ✅ Reset
                 if left_z >= Z_THRESHOLD and right_z >= Z_THRESHOLD:
                     leg_in_air = False
 
-                # ✅ Display Z values & leg info
+                # ✅ Draw Z-depth & Suggestions
                 z_info = f"Left Z: {left_z:.2f} | Right Z: {right_z:.2f}"
-                cv2.putText(image, z_info, (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 100, 100), 2)
-                if leg_raised:
-                    cv2.putText(image, f"Leg Raised: {leg_raised.upper()}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 255, 100), 2)
+                cv2.putText(image, z_info, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 100, 255), 2)
 
+                if leg_raised:
+                    cv2.putText(image, f"Leg Raised: {leg_raised.upper()}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+                cv2.putText(image, f"Status: {status}", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                cv2.putText(image, f"Suggestion: {suggestion}", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
+                # ✅ Draw full pose
                 mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
         except Exception as e:
             print("Error:", e)
 
-        cv2.imshow('Mediapipe Feed', image)
+        cv2.imshow("Processed Feed (ROI)", image)
+        cv2.imshow("Full Frame with Center & ROI", frame_display)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

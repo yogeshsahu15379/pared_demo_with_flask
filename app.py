@@ -77,6 +77,11 @@ def tejchal():
 def hillmarch():
     return render_template("hill_march_tracking.html")
 
+@app.route("/admin")
+def admin_panel():
+    return render_template("admin_panel.html")
+
+
 @app.route("/result")
 def index():
     results = get_results()
