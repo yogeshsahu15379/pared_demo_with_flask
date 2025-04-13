@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pose Detection</title>
+    <style>
+        body {
+            font-family: Arial;
+            display: flex;
+            gap: 30px;
+            padding: 20px;
+        }
+        .stream-container {
+            border: 3px solid #444;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .info-box {
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="stream-container">
+        <img src="{{ url_for('video_feed') }}" width="640" height="480">
+    </div>
+
+    <!-- <div class="info-box">
+        <p><strong>Elbow Angle:</strong> <span id="angle">Loading...</span>°</p>
+        <p><strong>Suggestion:</strong> <span id="status">Loading...</span></p>
+    </div> -->
+
+    <!-- <script>
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('angle').textContent = data.angle;
+                    document.getElementById('status').textContent = data.status;
+                });
+        }
+
+        setInterval(fetchData, 500); // update every 500ms
+    </script> -->
+</body>
+</html>

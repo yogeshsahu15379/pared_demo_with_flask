@@ -1,9 +1,17 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request,Response
 import sqlite3
 import subprocess
 import json
 app = Flask(__name__)
 tracking_processes = {}  # To track multiple processes
+from pose_logic import frame_worker, get_frame, get_pose_data
+import threading
+import time
+
+# Start the background thread
+t = threading.Thread(target=frame_worker)
+t.daemon = True
+t.start()
 
 def get_results():
     conn = sqlite3.connect("salute_results.db")
@@ -145,6 +153,30 @@ def stop_tracking(mode):
 def api_results():
     results = get_results()
     return jsonify(results)
+
+# Start background thread on app startup
+
+@app.route('/pose')
+def pose():
+    return render_template('pose.html')
+
+
+@app.route('/video_feed')
+def video_feed():
+    def generate():
+        while True:
+            frame = get_frame()
+            if frame:
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+            time.sleep(0.05)  # slight delay to avoid overwhelming the browser
+
+    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# @app.route('/pose_data')
+# def pose_data():
+#     data = get_pose_data()
+#     return jsonify(data if data else {"angle": 0, "status": "Loading..."})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=80)
