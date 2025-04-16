@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request,Response
+from flask import Flask, session, redirect, url_for, request, render_template, jsonify, Response
 import sqlite3
 import subprocess
 import json
@@ -8,7 +8,16 @@ tracking_processes = {}  # To track multiple processes
 # from kadamchal_feed import kadamtal_frame_worker, get_kadamtal_frame
 import threading
 import time
+from functools import wraps
+
 from live_video_module.salute_feed import generate_frames  # ✅ Import from the above file
+from live_video_module.kadamchal_feed import kadamtal_generate_frames  # ✅ Import from the above file
+from live_video_module.baju_swing_feed import baju_swing_generate_frames  # ✅ Import from the above file
+from live_video_module.tej_chal_feed import tej_chal_generate_frames  # ✅ Import from the above file
+from live_video_module.slow_chal_feed import slow_chal_generate_frames  # ✅ Import from the above file
+from live_video_module.hill_march_feed import hill_march_generate_frames  # ✅ Import from the above file
+
+app.secret_key = 'koi_secure_random_secret_key'  # Required for sessions
 
 
 def get_results():
@@ -50,6 +59,33 @@ def getTejChal_result():
     data = cursor.fetchall()
     conn.close()
     return data
+
+# Custom decorator to protect admin route
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session or session.get('role') != 'admin':
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Dummy check — real app me DB se check karo
+        if username == 'admin' and password == 'admin123':
+            session['user'] = username
+            session['role'] = 'admin'
+            return redirect(url_for('admin_video_panel'))
+        else:
+            return render_template('login.html', error="Invalid credentials")
+
+    return render_template('login.html')
+
 
 @app.route("/")
 def home():
@@ -164,6 +200,36 @@ def pose():
 def salue_live_feed():
     return Response(generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/kadamchal_live_feed')
+def kadamchal_live_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/bajuswing_live_feed')
+def bajuswing_live_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/hill_march_live_feed')
+def hill_march_live_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/tej_chal_live_feed')
+def tej_chal_live_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/slow_chal_live_feed')
+def slow_chal_live_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/admin_video_panel')
+@admin_required
+def admin_video_panel():
+    return render_template("admin_video_panel.html")
 
 # @app.route('/pose_data')
 # def pose_data():

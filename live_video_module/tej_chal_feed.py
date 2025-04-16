@@ -7,9 +7,9 @@ mp_drawing = mp.solutions.drawing_utils
 frame_skip = 2
 frame_count = 0
 
-def generate_frames():
+def tej_chal_generate_frames():
     global frame_count
-    cap = cv2.VideoCapture("rtsp://192.168.18.131:8080/h264_ulaw.sdp")  # Replace with your video source
+    cap = cv2.VideoCapture(0)   
 
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
         while True:
