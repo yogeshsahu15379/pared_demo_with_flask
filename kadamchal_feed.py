@@ -1,29 +1,14 @@
 import cv2
-import mediapipe as mp
 import numpy as np
-import sqlite3
-import time
+import mediapipe as mp
 import threading
-import queue
 
-mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-# ✅ Database Connection
-conn = sqlite3.connect("salute_results.db", check_same_thread=False)
-cursor = conn.cursor()
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS kadamtal_result (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp TEXT,
-        angle REAL,
-        palm_angle REAL,
-        status TEXT,
-        suggestion TEXT,
-        screenshot_path TEXT
-    )
-""")
-conn.commit()
+output_frame = None
+pose_data = None
+frame_text = None  # Added to store frame text
+pose_lock = threading.Lock()
 
 def calculate_angle(a, b, c):
     a = np.array(a)
@@ -36,70 +21,58 @@ def calculate_angle(a, b, c):
         angle = 360.0 - angle
         
     return angle 
-# ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/1?transportmode=unicast&profile=vam")  # ✅ IP Camera URL
-# testing
-# cap = cv2.VideoCapture(0)  # ✅ IP Camera URL
 
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  
+def update_frame_and_text(new_frame, new_text):
+    """Update the frame and frame text from kadamtal_detection."""
+    global output_frame, frame_text
+    with pose_lock:
+        output_frame = new_frame
+        frame_text = new_text
 
-frame_queue = queue.Queue()  # ✅ Queue for multi-threading
-last_store_time = 0  
-frame_skip = 2  # ✅ Process every 2nd frame
-frame_count = 0  
+def kadamtal_frame_worker():
+    global output_frame, pose_data
+    # cap= cv2.VideoCapture(0)
+    cap = cv2.VideoCapture("rtsp://192.168.1.7:8080/h264_ulaw.sdp", cv2.CAP_FFMPEG)
+    frame_count = 0
+    process_every_nth_frame = 2
 
-# ✅ Multi-threading for reading frames
-def read_frames():
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frame_queue.put(frame)
+    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+        while True:
+            ret, frame = cap.read()
+            if not ret or frame is None:
+                print("Frame drop / decode error")
+                continue  # instead of break
 
-frame_thread = threading.Thread(target=read_frames, daemon=True)
-frame_thread.start()
+            frame_count += 1
+            if frame_count % process_every_nth_frame != 0:
+                continue
 
-low_knee_position = None
-previous_knee_position = None
-data ={
-    "timestamp": None,
-    "angle": None,
-    "status": None,
-    "suggestion": None,
-    "screenshot_path": None
-}
+            # Remove horizontal flip to avoid mirror effect
+            # frame = cv2.flip(frame, 1)
+            
+            # Crop the frame to center width=300 and height=600
+            frame_height, frame_width = frame.shape[:2]
+            center_x, center_y = frame_width // 2, frame_height // 2
+            crop_width, crop_height = 300, 600
+            x1 = max(center_x - crop_width // 2, 0)
+            y1 = max(center_y - crop_height // 2, 0)
+            x2 = min(center_x + crop_width // 2, frame_width)
+            y2 = min(center_y + crop_height // 2, frame_height)
+            frame = frame[y1:y2, x1:x2]
 
-# ✅ Mediapipe Pose Model
-with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
-    while cap.isOpened():
-        if frame_queue.empty():
-            continue
+            # Use the cropped frame for pose detection
+            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image.flags.writeable = False
 
-        frame = frame_queue.get()
-        frame = cv2.resize(frame, (840, 600))  # ✅ Resize frame for performance
-        crop_width = 300  # You can change this to desired cropped width
-        frame_height, frame_width, _ = frame.shape
-        start_x = (frame_width - crop_width) // 2
-        end_x = start_x + crop_width
-        frame = frame[:, start_x:end_x]
-        frame_count += 1
-        if frame_count % frame_skip != 0:
-            continue  # ✅ Skip alternate frames to improve performance
-        
-        current_time = time.time()
-        
-        # Recolor image to RGB
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image.flags.writeable = False
-      
-        # Make detection
-        results = pose.process(image)
-    
-        # Recolor back to BGR
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        
-        try:
+            results = pose.process(image)  # Pose detection is limited to the cropped region
+
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+            angle = 0
+            status = "No pose detected"
+            suggestion = ""
+
             if results.pose_landmarks:  # ✅ Check if pose landmarks are detected
                 landmarks = results.pose_landmarks.landmark
                 
@@ -258,58 +231,27 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                 color = (0, 255, 0) if "Correct" in status else (0, 0, 255)
                 cv2.putText(image, f'Suggestion: {suggestion}', (50, 50),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-              
-                if(leg == "right"):
-                    if previous_knee_position is not None:
-                        if right_hip_angle < previous_knee_position:
-                            low_knee_position = right_hip_angle
-                            screenshot_path = f"static/screenshots/kadamtal_{int(time.time())}.jpg"
-                            data["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
-                            data["angle"] = angle
-                            data["status"] = status
-                            data["suggestion"] = suggestion
-                            data["screenshot_path"] = screenshot_path
-                            cv2.imwrite(screenshot_path, frame)
+            with pose_lock:
+                output_frame = image.copy()
+                pose_data = {
+                    "angle":angle,
+                    "status": status,
+                    "suggestion": suggestion
+                }
+                # Add frame text to the image
+                if frame_text:
+                    cv2.putText(output_frame, frame_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-                        elif right_knee_angle >150 and low_knee_position is not None:
-                            cursor.execute("INSERT INTO kadamtal_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                                    (data["timestamp"], data["angle"], data["status"], data["suggestion"], data["screenshot_path"]))
-                            conn.commit()   
-                            low_knee_position = None
-                    previous_knee_position = right_hip_angle
-                elif(leg == "left"):
-                    if previous_knee_position is not None:
-                        if left_hip_angle < previous_knee_position:
-                            low_knee_position = left_hip_angle
-                            screenshot_path = f"static/screenshots/kadamtal_{int(time.time())}.jpg"
-                            data["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
-                            data["angle"] = angle
-                            data["status"] = status
-                            data["suggestion"] = suggestion
-                            data["screenshot_path"] = screenshot_path
-                            cv2.imwrite(screenshot_path, frame)
+    cap.release()
 
-                        elif right_knee_angle >150 and low_knee_position is not None:
-                            cursor.execute("INSERT INTO kadamtal_result (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                                    (data["timestamp"], data["angle"], data["status"], data["suggestion"], data["screenshot_path"]))
-                            conn.commit()   
-                            low_knee_position = None
-                    previous_knee_position = left_hip_angle
+def get_kadamtal_frame():
+    with pose_lock:
+        if output_frame is None:
+            return None
+        _, buffer = cv2.imencode('.jpg', output_frame)
+        return buffer.tobytes()
 
+def get_pose_data():
+    with pose_lock:
+        return pose_data
 
-        except Exception as e:
-            print(e)
-        # # Render detections
-        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
-                                mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
-                                 )
-        # Display on screen
-        cv2.imshow('Kadam tal', image)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):  # ✅ Reduced delay for smoother video
-            break
-
-cap.release()
-cv2.destroyAllWindows()
-conn.close()

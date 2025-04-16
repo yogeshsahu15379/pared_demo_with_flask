@@ -99,15 +99,16 @@ def calculate_angle(a, b, c):
 def frame_worker():
     global output_frame, pose_data
 
-    cap = cv2.VideoCapture("rtsp://admin:Admin@123@192.168.0.13:554/1/2?transmode=unicast&profile=vam")
+    cap = cv2.VideoCapture("rtsp://192.168.1.23:8080/h264_ulaw.sdp", cv2.CAP_FFMPEG)
     frame_count = 0
     process_every_nth_frame = 2
 
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
         while True:
             ret, frame = cap.read()
-            if not ret:
-                break
+            if not ret or frame is None:
+                print("Frame drop / decode error")
+                continue  # instead of break
 
             frame_count += 1
             if frame_count % process_every_nth_frame != 0:

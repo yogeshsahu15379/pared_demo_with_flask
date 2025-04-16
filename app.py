@@ -4,14 +4,12 @@ import subprocess
 import json
 app = Flask(__name__)
 tracking_processes = {}  # To track multiple processes
-from pose_logic import frame_worker, get_frame, get_pose_data
+# from salute_feed import frame_worker, get_frame, get_pose_data
+# from kadamchal_feed import kadamtal_frame_worker, get_kadamtal_frame
 import threading
 import time
+from live_video_module.salute_feed import generate_frames  # ✅ Import from the above file
 
-# Start the background thread
-t = threading.Thread(target=frame_worker)
-t.daemon = True
-t.start()
 
 def get_results():
     conn = sqlite3.connect("salute_results.db")
@@ -60,6 +58,7 @@ def home():
 @app.route("/track")
 def track():
     return render_template("tracking.html")
+
 
 @app.route("/salute")
 def salute():
@@ -161,17 +160,10 @@ def pose():
     return render_template('pose.html')
 
 
-@app.route('/video_feed')
-def video_feed():
-    def generate():
-        while True:
-            frame = get_frame()
-            if frame:
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-            time.sleep(0.05)  # slight delay to avoid overwhelming the browser
-
-    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/salue_live_feed')
+def salue_live_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # @app.route('/pose_data')
 # def pose_data():

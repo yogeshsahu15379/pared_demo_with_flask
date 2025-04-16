@@ -38,7 +38,7 @@ def calculate_angle(a, b, c):
     return angle 
 
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.14:554/1/1?transportmode=unicast&profile=vam")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://192.168.1.23:8080/h264_ulaw.sdp")  # ✅ IP Camera URL
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -179,3 +179,34 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
 cap.release()
 cv2.destroyAllWindows()
 conn.close()
+
+
+# pose_logic.py
+# def generate_frames():
+#     cap = cv2.VideoCapture("rtsp://192.168.1.23:8080/h264_ulaw.sdp")
+#     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+#     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+#     mp_pose = mp.solutions.pose
+#     pose = mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3)
+
+#     while True:
+#         success, frame = cap.read()
+#         if not success:
+#             break
+
+#         # Pose detection logic (minimal ya full) – abhi ke liye sirf draw kar raha hoon
+#         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#         results = pose.process(rgb)
+
+#         if results.pose_landmarks:
+#             mp.solutions.drawing_utils.draw_landmarks(
+#                 frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+#         # Encode frame to JPEG
+#         ret, buffer = cv2.imencode('.jpg', frame)
+#         frame = buffer.tobytes()
+
+#         # Yield frame for streaming
+#         yield (b'--frame\r\n'
+#                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
