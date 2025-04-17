@@ -100,21 +100,41 @@ def track():
 def salute():
     return render_template("salute_tracking.html")
 
+@app.route("/salute/analysis")
+def salute_analysis():
+    return render_template("salute_tracking_analysis.html")
+
 @app.route("/kadamchal")
 def kadamchal():
     return render_template("kadamchal_tracking.html")
+
+@app.route("/kadamchal/analysis")
+def kadamchal_analysis():
+    return render_template("kadamchal_tracking_analysis.html")
 
 @app.route("/bajuswing")
 def bajuswing():
     return render_template("baju_swing_1_tracking.html")
 
+@app.route("/bajuswing/analysis")
+def bajuswing_analysis():
+    return render_template("baju_swing_1_tracking_analysis.html")
+
 @app.route("/slowmarch")
 def slowmarch():
     return render_template("slow_march_tracking.html")
+  
+@app.route("/slowmarch/analysis")
+def slowmarch_analysis():
+    return render_template("slow_march_tracking_analysis.html")
 
 @app.route("/tejchal")
 def tejchal():
     return render_template("tej_chal_tracking.html")
+
+@app.route("/tejchal/analysis")
+def tejchal_analysis():
+    return render_template("tej_chal_tracking_analysis.html")
 
 @app.route("/hillmarch")
 def hillmarch():
@@ -203,27 +223,27 @@ def salue_live_feed():
 
 @app.route('/kadamchal_live_feed')
 def kadamchal_live_feed():
-    return Response(generate_frames(),
+    return Response(kadamtal_generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/bajuswing_live_feed')
 def bajuswing_live_feed():
-    return Response(generate_frames(),
+    return Response(baju_swing_generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/hill_march_live_feed')
 def hill_march_live_feed():
-    return Response(generate_frames(),
+    return Response(hill_march_generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/tej_chal_live_feed')
 def tej_chal_live_feed():
-    return Response(generate_frames(),
+    return Response(tej_chal_generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/slow_chal_live_feed')
 def slow_chal_live_feed():
-    return Response(generate_frames(),
+    return Response(slow_chal_generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/admin_video_panel')

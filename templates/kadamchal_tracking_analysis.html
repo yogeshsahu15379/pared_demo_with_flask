@@ -106,13 +106,17 @@
 <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
         <a href="/kadamchal_result"><button type="button" class="btn result">View Result</button></a>
     </div>
+    <div>
+        <img src="{{ url_for('kadamchal_live_feed') }}" width="640" height="480">
+
+    </div>
     <script>
         function startTracking() {
             fetch('/start_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
-            window.location.href = "/kadamchal/analysis";
         }
         function stopTracking() {
             fetch('/stop_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
+            window.location.href = "/kadamchal";
         }
         </script>
 </body>

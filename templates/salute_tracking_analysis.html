@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kadam- chal Tracking</title>
+    <title>Salute Tracking</title>
     <style>
         .btn-custom {
             display: inline-block;
@@ -101,18 +101,23 @@
     </head>
 <body>
     <div class="container mt-5">
-        <h1 style="text-align: center;">Kadam-Chal Control Pannel</h1>
+        <h1 style="text-align: center;">Salute Control Pannel</h1>
         <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
 <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
-        <a href="/kadamchal_result"><button type="button" class="btn result">View Result</button></a>
+        <a href="/result"><button type="button" class="btn result">View Result</button></a>
     </div>
+    <div>
+        <img src="{{ url_for('salue_live_feed') }}" width="640" height="480">
+
+    </div>
+    
     <script>
         function startTracking() {
-            fetch('/start_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
-            window.location.href = "/kadamchal/analysis";
+            fetch('/start_tracking/salute').then(response => response.json()).then(data => alert(data.status));
         }
         function stopTracking() {
-            fetch('/stop_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
+            fetch('/stop_tracking/salute').then(response => response.json()).then(data => alert(data.status));
+            window.location.href = "/salute";
         }
         </script>
 </body>

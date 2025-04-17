@@ -38,7 +38,7 @@ def calculate_angle(a, b, c):
     return angle 
 # rtsp://192.168.0.11:554/1/1?transmode=unicast&profile=va
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.12:554/1/1?transportmode=unicast&profile=va")  # ✅ IP Camera URL
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.12:554/1/2?transmode=unicast&profile=va")   
 # testing
 # cap = cv2.VideoCapture(0)  # ✅ IP Camera URL
 

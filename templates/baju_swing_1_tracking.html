@@ -27,6 +27,7 @@
         fetch("/start_tracking/baju_swing_1")
           .then((response) => response.json())
           .then((data) => alert(data.status));
+          window.location.href = "/bajuswing/analysis";
       }
       function stopTracking() {
         fetch("/stop_tracking/baju_swing_1")

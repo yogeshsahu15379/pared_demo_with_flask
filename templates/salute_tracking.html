@@ -106,14 +106,11 @@
 <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
         <a href="/result"><button type="button" class="btn result">View Result</button></a>
     </div>
-    <div>
-        <img src="{{ url_for('salue_live_feed') }}" width="640" height="480">
-
-    </div>
     
     <script>
         function startTracking() {
             fetch('/start_tracking/salute').then(response => response.json()).then(data => alert(data.status));
+            window.location.href = "/salute/analysis"; // Redirect to the analysis page after starting tracking
         }
         function stopTracking() {
             fetch('/stop_tracking/salute').then(response => response.json()).then(data => alert(data.status));

@@ -27,6 +27,7 @@
         fetch("/start_tracking/tejchal")
           .then((response) => response.json())
           .then((data) => alert(data.status));
+          window.location.href = "/tejchal/analysis";
       }
       function stopTracking() {
         fetch("/stop_tracking/tejchal")

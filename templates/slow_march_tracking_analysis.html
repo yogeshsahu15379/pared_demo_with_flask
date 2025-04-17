@@ -22,17 +22,20 @@
         ><button type="button" class="btn result">View Result</button></a
       >
     </div>
+    <div>
+      <img src="{{ url_for('slow_chal_live_feed') }}" width="640" height="480">
+    </div>
     <script>
       function startTracking() {
         fetch("/start_tracking/slowmarch")
           .then((response) => response.json())
           .then((data) => alert(data.status));
-        window.location.href = "/slowmarch/analysis";
       }
       function stopTracking() {
         fetch("/stop_tracking/slowmarch")
           .then((response) => response.json())
           .then((data) => alert(data.status));
+          window.location.href = "/slowmarch";
       }
     </script>
   </body>
