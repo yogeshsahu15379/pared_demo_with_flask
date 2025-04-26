@@ -1,4 +1,4 @@
-from flask import Flask, session, redirect, url_for, request, render_template, jsonify, Response
+from flask import Flask, session, redirect, url_for, request, render_template, jsonify, Response, send_file, abort
 import sqlite3
 import subprocess
 import json
@@ -16,6 +16,8 @@ from live_video_module.baju_swing_feed import baju_swing_generate_frames  # ✅ 
 from live_video_module.tej_chal_feed import tej_chal_generate_frames  # ✅ Import from the above file
 from live_video_module.slow_chal_feed import slow_chal_generate_frames  # ✅ Import from the above file
 from live_video_module.hill_march_feed import hill_march_generate_frames  # ✅ Import from the above file
+from pdf_generator import generate_pdf_from_table
+
 
 app.secret_key = 'koi_secure_random_secret_key'  # Required for sessions
 
@@ -68,6 +70,16 @@ def admin_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+@app.route('/download-pdf/<table_name>')
+def download_pdf(table_name):
+    try:
+        filepath = generate_pdf_from_table(table_name)
+        return send_file(filepath, as_attachment=True)
+    except ValueError:
+        return abort(400, description="Invalid table name")
+    except Exception as e:
+        return abort(500, description=f"Error: {str(e)}")
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
@@ -258,3 +270,4 @@ def admin_video_panel():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=80)
+    # serve(app, host="0.0.0.0", port=80)

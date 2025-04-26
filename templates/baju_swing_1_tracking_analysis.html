@@ -9,7 +9,18 @@
       href="../static/style.css"
     />
   </head>
+  <style>
+    .analysis_container{
+          display: flex;
+      }
+      .analysis_container img{
+          width: 300px;
+          height: 600px;
+      }
+  </style>
   <body>
+    <div class="analysis_container">
+
     <div class="container mt-5">
       <h1 style="text-align: center">Baju Swing Control Panel</h1>
       <button type="button" class="btn start" onclick="startTracking()">
@@ -25,6 +36,8 @@
     <div>
       <img src="{{ url_for('bajuswing_live_feed') }}" width="640" height="480">
     </div>
+    </div>
+
     <script>
       function startTracking() {
         fetch("/start_tracking/baju_swing_1")

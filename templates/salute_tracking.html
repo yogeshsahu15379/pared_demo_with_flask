@@ -105,6 +105,9 @@
         <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
 <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
         <a href="/result"><button type="button" class="btn result">View Result</button></a>
+        <a href="/download-pdf/results" class="download-btn" download>
+            📥 Download PDF
+        </a>
     </div>
     
     <script>
@@ -115,6 +118,7 @@
         function stopTracking() {
             fetch('/stop_tracking/salute').then(response => response.json()).then(data => alert(data.status));
         }
+
         </script>
 </body>
 </html>

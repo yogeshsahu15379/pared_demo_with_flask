@@ -1,3 +1,4 @@
+import math
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -37,8 +38,11 @@ def calculate_angle(a, b, c):
         
     return angle 
 
+def get_distance(pose1, pose2):
+    return round(math.sqrt((pose2[0] - pose1[0])**2 + (pose2[1] - pose1[1])**2) * 100,2)
+
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.18:554/1/2?transmode=unicast&profile=va")  # Replace with your video source
+cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.14:554/1/1?transmode=unicast&profile=vam")  # Replace with your video source
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -61,7 +65,7 @@ frame_thread = threading.Thread(target=read_frames, daemon=True)
 frame_thread.start()
 
 # ✅ Mediapipe Pose Model
-with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as pose:
+with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
     while cap.isOpened():
         if frame_queue.empty():
             continue
@@ -106,29 +110,52 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
                 wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
                 hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
                 right_index = [landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_INDEX.value].y]
-            
+                left_elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+                left_wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+                right_foot_index = [landmarks[mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value].y]
+                left_foot_index = [landmarks[mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value].x,landmarks[mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value].y]
+                right_heel = [landmarks[mp_pose.PoseLandmark.RIGHT_HEEL.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_HEEL.value].y]
+                left_heel = [landmarks[mp_pose.PoseLandmark.LEFT_HEEL.value].x,landmarks[mp_pose.PoseLandmark.LEFT_HEEL.value].y]
+                left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
                 # Calculate angle
                 elbow_angle = calculate_angle(shoulder, elbow, wrist)
                 arm_angle = calculate_angle(hip, shoulder, elbow)
                 wrist_angle = calculate_angle(elbow, wrist, right_index)
                 arm_straight_angle = calculate_angle(left_shoulder, shoulder, elbow)
+                left_hand_angle = calculate_angle(left_shoulder,left_elbow,left_wrist)
+                both_foot_distence = get_distance(right_foot_index,left_foot_index)
+                both_heel_distence = get_distance(left_heel,right_heel)
+                left_shoulder_angle = calculate_angle(shoulder,left_shoulder,left_wrist)
+                left_elbow_angle = calculate_angle(left_shoulder,left_elbow,left_wrist)
 
-                angle = "Elbow Angle: " + str(int(elbow_angle)) + " Arm Angle: " + str(int(arm_angle)) + " Wrist Angle: " + str(int(wrist_angle))
+
+                angle = "Elbow Angle: " + str(int(elbow_angle)) + " Arm Angle: " + str(int(arm_angle)) + " Wrist Angle: " + str(int(wrist_angle)) + " Foot distence"+ str(both_foot_distence) + " left shoulder angle: " + str(int(left_shoulder_angle)) +"heel distance: " + str(both_heel_distence)+ "left elbow angle: "+ str(int(left_elbow_angle))
                 status = "Salute is wrong"
 
                 # Determine suggestion based on arm_angle
-                if 85 <= arm_angle <= 120 and 20 <= elbow_angle <= 30 and 168 <= wrist_angle <= 180:
+                if 85 <= arm_angle <= 120 and 15 <= elbow_angle <= 35 and 160 <= wrist_angle <= 180 and 5< both_foot_distence <9.5 and 90< left_shoulder_angle < 105 and 160 < left_elbow_angle < 180 and both_heel_distence < 4.5:
                     suggestion = "Perfect position"
                     status = "Salute is Correct"
+                elif both_foot_distence <5:
+                    suggestion = "Dono pair thoda aur khole"
+                elif both_heel_distence >4.5:
+                    suggestion = "dono heel apas pr chipki hui honi chahiye. "
+
+                elif both_foot_distence > 9.5 :
+                    suggestion = f"Dono panjo k beech ki duri ko {int(both_foot_distence - 9.5)}inch kam kre."
+                elif 105 < left_shoulder_angle < 90:
+                    suggestion = "left hand left pair k pant ki pocket k sath chupka hua hona chahiye"
+                elif 160 > left_elbow_angle < 180:
+                    suggestion = "left kohgni body k sath chipki hui honi chahiye."
                 elif arm_angle < 85:
                     suggestion = "Raise arm slowly [" + str(int(arm_angle)) + "]"
                 elif arm_angle > 120:
                     suggestion = "Lower arm slowly [" + str(int(arm_angle)) + "]"
-                elif elbow_angle < 20:
+                elif elbow_angle < 15:
                     suggestion = "Raise elbow slightly [" + str(int(elbow_angle)) + "]"
-                elif elbow_angle > 30:
+                elif elbow_angle > 35:
                     suggestion = "Lower elbow slightly [" + str(int(elbow_angle)) + "]"
-                elif wrist_angle < 168:
+                elif wrist_angle < 160:
                     suggestion = "Raise wrist slightly [" + str(int(wrist_angle)) + "]"
                 elif wrist_angle > 180:
                     suggestion = "Lower wrist slightly [" + str(int(wrist_angle)) + "]"
@@ -136,7 +163,17 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
                 # Display suggestion on the screen
                 color = (0, 255, 0) if "Correct" in status else (0, 0, 255)
                 cv2.putText(centered_image, f'Suggestion: {suggestion}', (10, 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 2)
+                
+                # cv2.putText(centered_image,f'heel distence: {both_heel_distence}',(10,200),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5,color,2)
+                
+                # cv2.putText(centered_image,f'foot distence: {both_foot_distence}',(10,150),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5,color,2)
+                
+                # if 6.5< both_foot_distence <9.5 :
+                # cv2.putText(centered_image,f"shoulder angle {left_shoulder_angle}", (10,250),
+                #             cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
 
                 # Visualize angles
                 cv2.putText(centered_image, str(int(elbow_angle)), 
@@ -150,6 +187,9 @@ with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2, cv2.LINE_AA)
                 cv2.putText(centered_image, str(int(arm_straight_angle)),
                             tuple(np.multiply(left_shoulder, [roi_width, roi_height]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(centered_image, str(int(left_hand_angle)),
+                            tuple(np.multiply(left_elbow, [roi_width, roi_height]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2, cv2.LINE_AA)
 
                 # ✅ Save Screenshot & Data (Every 1 second)

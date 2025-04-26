@@ -70,7 +70,7 @@ data ={
 }
 
 # ✅ Mediapipe Pose Model
-with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
+with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
         if frame_queue.empty():
             continue

@@ -8,8 +8,19 @@
       rel="stylesheet"
       href="../static/style.css"
     />
+    <style>
+      .analysis_container{
+            display: flex;
+        }
+        .analysis_container img{
+            width: 300px;
+            height: 600px;
+        }
+    </style>
   </head>
   <body>
+    <div class="analysis_container">
+
     <div class="container mt-5">
       <h1 style="text-align: center">Slow March Control Panel</h1>
       <button type="button" class="btn start" onclick="startTracking()">
@@ -24,6 +35,7 @@
     </div>
     <div>
       <img src="{{ url_for('slow_chal_live_feed') }}" width="640" height="480">
+    </div>
     </div>
     <script>
       function startTracking() {

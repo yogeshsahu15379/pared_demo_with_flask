@@ -97,9 +97,17 @@
         a{
             text-decoration: none;
         }
+        .analysis_container{
+            display: flex;
+        }
+        .analysis_container img{
+            width: 250px;
+            height: 600px;
+        }
     </style>
     </head>
 <body>
+    <div class="analysis_container">
     <div class="container mt-5">
         <h1 style="text-align: center;">Salute Control Pannel</h1>
         <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
@@ -109,6 +117,7 @@
     <div>
         <img src="{{ url_for('salue_live_feed') }}" width="640" height="480">
 
+    </div>
     </div>
     
     <script>

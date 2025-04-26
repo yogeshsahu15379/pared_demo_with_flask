@@ -97,18 +97,28 @@
         a{
             text-decoration: none;
         }
+        .analysis_container{
+            display: flex;
+        }
+        .analysis_container img{
+            width: 300px;
+            height: 600px;
+        }
     </style>
     </head>
 <body>
-    <div class="container mt-5">
-        <h1 style="text-align: center;">Kadam-Chal Control Pannel</h1>
-        <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
-<button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
-        <a href="/kadamchal_result"><button type="button" class="btn result">View Result</button></a>
-    </div>
-    <div>
-        <img src="{{ url_for('kadamchal_live_feed') }}" width="640" height="480">
+    <div class="analysis_container">
 
+        <div class="container mt-5">
+            <h1 style="text-align: center;">Kadam-Chal Control Pannel</h1>
+            <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
+            <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
+            <a href="/kadamchal_result"><button type="button" class="btn result">View Result</button></a>
+        </div>
+        <div>
+            <img src="{{ url_for('kadamchal_live_feed') }}" width="640" height="480">
+            
+        </div>
     </div>
     <script>
         function startTracking() {
