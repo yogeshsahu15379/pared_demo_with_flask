@@ -4,151 +4,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nova+Mono&display=swap" rel="stylesheet">
+    <title>Artificial Intelligence Drill Nursery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Nova', monospace;
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #ba4712;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --hover-shadow: rgba(0, 0, 0, 0.2);
         }
-    </style>
-    <style>
-  body {
-            background-color: #f8f9fa;
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        nav {
-            background-color: #007bff;
-            color: white;
-
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            line-height: 1.6;
+            color: var(--text-color);
         }
 
-        nav .logo {
-            height: 80px;
-            width: 80px;
+        header {
+            background-color: var(--primary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        header .logo {
+            height: 60px;
+            width: 60px;
             border-radius: 50%;
+            object-fit: cover;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: white;
+            margin: 0;
+        }
+
+        main {
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        main h2 {
+            color: var(--secondary-color);
+            font-size: 2.5rem;
+            margin-bottom: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 20px;
-            gap: 10px; /* Add gap for better spacing */
-            justify-content: center; /* Center cards */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 0 2rem;
+            justify-items: center;
         }
 
         .card {
-            flex: 1 1 calc(33.333% - 20px); /* Adjust width dynamically */
-            max-width: 300px; /* Optional: Limit max width */
-            border: 1px solid #ddd; /* Subtle border */
-            border-radius: 10px; /* Rounded corners */
-            padding: 20px; /* Increased padding */
-            box-sizing: border-box;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            padding: 2rem;
             text-decoration: none;
-            background-color: #ffffff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            color: inherit;
+            box-shadow: 0 6px 12px var(--shadow-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+            width: 100%;
+            max-width: 320px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: var(--primary-color);
         }
 
         .card:hover {
-            background-color: #f9f9f9; /* Slightly lighter background */
-            transform: translateY(-10px); /* More pronounced hover effect */
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px var(--hover-shadow);
         }
 
-        .card h2 {
-            color: #007bff; /* Accent color for titles */
-            font-size: 1.5em; /* Larger font size */
-            margin-bottom: 10px;
+        .card i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 0.75rem;
         }
 
         .card p {
-            color: #555; /* Softer text color */
-            font-size: 1em;
-            line-height: 1.5; /* Better readability */
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 3rem;
         }
 
         @media (max-width: 768px) {
-            .card {
-                flex: 1 1 calc(50% - 20px); /* Adjust for smaller screens */
+            header {
+                flex-direction: column;
+            }
+
+            header .logo {
+                margin-bottom: 1rem;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            .card-container {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
             }
         }
 
         @media (max-width: 480px) {
+            main h2 {
+                font-size: 2rem;
+            }
+
             .card {
-                flex: 1 1 100%; /* Full width for very small screens */
+                padding: 1.5rem;
+            }
+        }
+        @media (max-width: 1200px) {
+            .card-container {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 
 <body>
-    <nav>
-        <img class="logo" src="static/Indian_Army_logo.png" alt="">
-        <h1 style="margin: 20px;">Artificial Intelligence Drill Nursery</h1>
-
-    </nav>
-
-    <h2 style="text-align: center;    color: #ba4712;">Choose your drill</h2>
-
-    <div class="card-container">
-        <a class="card" href="/salute">
-            <div>
-                <h2>Salute</h2>
+    <header>
+        <img class="logo" src="static/Indian_Army_logo.png" alt="Indian Army Logo">
+        <h1>Artificial Intelligence Drill Nursery</h1>
+    </header>
+    <main>
+        <h2>Choose Your Drill</h2>
+        <div class="card-container">
+            <a class="card" href="/salute" aria-label="Salute Drill">
+                <i class="fas fa-hand-paper"></i>
+                <h3>Salute</h3>
                 <p>The salute is a gesture of respect and trust.</p>
-            </div>
-        </a>
-        <a class="card" href="/kadamchal">
-            <div>
-                <h2> Kadam Tal</h2>
+            </a>
+            <a class="card" href="/kadamchal" aria-label="Kadam Tal Drill">
+                <i class="fas fa-shoe-prints"></i>
+                <h3>Kadam Tal</h3>
                 <p>Click here for Kadam Tal Tracking.</p>
-            </div>
-        </a>
-
-        <!-- <a class="card" href="/result">
-        <div>
-            <h2>Parede Drill</h2>
-            <p>Click here for Parede drill.</p>
-        </div>
-    </a>  -->
-        <a class="card" href="/bajuswing">
-            <div>
-                <h2>Baju Swing</h2>
+            </a>
+            <a class="card" href="/bajuswing" aria-label="Baju Swing Drill">
+                <i class="fas fa-running"></i>
+                <h3>Baju Swing</h3>
                 <p>Click here for Swing.</p>
-            </div>
-        </a> 
-        <a class="card" href="/slowmarch">
-            <div>
-                <h2>Slow March Track</h2>
+            </a>
+            <a class="card" href="/slowmarch" aria-label="Slow March Drill">
+                <i class="fas fa-walking"></i>
+                <h3>Slow March Track</h3>
                 <p>Click here for Slow March.</p>
-            </div>
-        </a> <a class="card" href="/tejchal">
-            <div>
-                <h2>Tej March</h2>
+            </a>
+            <a class="card" href="/tejchal" aria-label="Tej March Drill">
+                <i class="fas fa-forward"></i>
+                <h3>Tej March</h3>
                 <p>Click here for Tej Chal.</p>
-            </div>
-        </a>
-        </a> <a class="card" href="/hillmarch">
-            <div>
-                <h2>Hill March</h2>
+            </a>
+            <a class="card" href="/hillmarch" aria-label="Hill March Drill">
+                <i class="fas fa-mountain"></i>
+                <h3>Hill March</h3>
                 <p>Click here for Hill March.</p>
-            </div>
-        </a>
-        </a> 
-        <!-- <a class="card" href="/result">
-            <div>
-                <h2>Baju Swing track 2</h2>
-                <p>Click here for Baju swing track 2.</p>
-            </div>
-        </a> -->
-    </div>
-
-
+            </a>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2023 Artificial Intelligence Drill Nursery. All rights reserved.</p>
+    </footer>
 </body>
 
 </html>
