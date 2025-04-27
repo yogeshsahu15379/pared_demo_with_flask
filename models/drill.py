@@ -12,6 +12,17 @@ class DrillType(str, Enum):
     SLOW_CHAL = "SLOW_CHAL"
     HILL_MARCH = "HILL_MARCH"
 
+# TEmp Mapping from input strings to DrillType
+drill_mapping = {
+    "salute": DrillType.SALUTE,
+    "kadamchal": DrillType.KADAMTAL,
+    "baju_swing_1": DrillType.BAJU_SWING,
+    "tejchal": DrillType.TEJ_CHAL,
+    "slowmarch": DrillType.SLOW_CHAL,
+    "hillmarch": DrillType.HILL_MARCH,
+}
+
+
 class BaseDrill(SQLModel):
     id: Optional[int] = Field(default=None, primary_key=True)
     timestamp: datetime.datetime = Field(

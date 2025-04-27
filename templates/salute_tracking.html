@@ -1,39 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salute Tracking</title>
     <style>
-        .btn-custom {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            outline: none;
-            color: #fff;
-            background-color: #4CAF50;
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            flex: 0 0 40%;
+            background-color: #f4f4f4;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        .user-table th {
+            font-weight: bold;
+        }
+
+        .select-btn {
+            padding: 6px 12px;
+            font-size: 14px;
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 9px #999;
-            transition: all 0.3s ease;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        .btn-custom:hover {background-color: #3e8e41}
-
-        .btn-custom:active {
-            background-color: #3e8e41;
-            box-shadow: 0 5px #666;
-            transform: translateY(4px);
+        .select-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
-        .container {
+
+        .main {
+            flex: 0 0 60%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 95vh;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .btn {
@@ -43,82 +77,161 @@
             margin: 10px 0;
             font-size: 18px;
             text-align: center;
-            text-decoration: none;
             color: #fff;
             background-color: #007BFF;
             border: none;
             border-radius: 5px;
             transition: background-color 0.3s, transform 0.3s;
-        }
-        .btn.stop {
-            background-color: #dc3545;
-        }
-        .btn.stop:hover {
-            background-color: #c82333;
-        }
-        .btn.result {
-            background-color: #ffc107;
-        }
-        .btn.result:hover {
-            background-color: #e0a800;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
             cursor: pointer;
         }
 
-        .btn:active {
-            transform: scale(0.98);
+        .btn.stop {
+            background-color: #dc3545;
+        }
+
+        .btn.result {
+            background-color: #ffc107;
+            color: #000;
         }
 
         .btn-custom {
-            display: block;
-            width: 200px;
-            padding: 15px;
-            margin: 10px 0;
-            font-size: 18px;
-            text-align: center;
-            text-decoration: none;
-            color: #fff;
             background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s, transform 0.3s;
         }
 
-        .btn-custom:hover {
-            background-color: #3e8e41;
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
-        .btn-custom:active {
-            transform: scale(0.98);
+        .btn:hover:not(:disabled),
+        .select-btn:hover:not(:disabled) {
+            opacity: 0.9;
         }
-        a{
-            text-decoration: none;
+
+        @media (max-width: 600px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar,
+            .main {
+                flex: none;
+                width: 100%;
+                height: auto;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
         }
     </style>
-    </head>
+</head>
+
 <body>
-    <div class="container mt-5">
-        <h1 style="text-align: center;">Salute Control Pannel</h1>
-        <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
-<button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
-        <a href="/result"><button type="button" class="btn result">View Result</button></a>
-        <a href="/download-pdf/results" class="download-btn" download>
-            📥 Download PDF
-        </a>
+    <div class="layout">
+        <div class="sidebar">
+            <h2>Active Users</h2>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>User ID</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="userList">
+                    <!-- Rows inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="main">
+            <h1>Salute Control Panel</h1>
+            <button id="startBtn" class="btn start btn-custom" onclick="startTracking()" disabled>Start
+                Tracking</button>
+            <button id="stopBtn" class="btn stop" onclick="stopTracking()" disabled>Stop Tracking</button>
+            <a id="viewResultLink" href="#"><button id="resultBtn" class="btn result" disabled>View Result</button></a>
+            <a id="downloadLink" href="#" download><button id="downloadBtn" class="btn" disabled>📥 Download
+                    PDF</button></a>
+        </div>
     </div>
-    
+
     <script>
-        function startTracking() {
-            fetch('/start_tracking/salute').then(response => response.json()).then(data => alert(data.status));
-            window.location.href = "/salute/analysis"; // Redirect to the analysis page after starting tracking
-        }
-        function stopTracking() {
-            fetch('/stop_tracking/salute').then(response => response.json()).then(data => alert(data.status));
+        let selectedUserId = null;
+        let prevButton = null;
+
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resultBtn = document.getElementById('resultBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const viewResultLink = document.getElementById('viewResultLink');
+        const downloadLink = document.getElementById('downloadLink');
+        const userList = document.getElementById('userList');
+
+        function updateControls() {
+            const enabled = !!selectedUserId;
+            startBtn.disabled = !enabled;
+            stopBtn.disabled = !enabled;
+            resultBtn.disabled = !enabled;
+            downloadBtn.disabled = !enabled;
+            if (enabled) {
+                viewResultLink.href = `/result/${selectedUserId}`;
+                downloadLink.href = `/download-pdf/results/${selectedUserId}`;
+            }
         }
 
-        </script>
+        function selectUser(userId, btn) {
+            if (prevButton) prevButton.disabled = false;
+            selectedUserId = userId;
+            btn.disabled = true;
+            prevButton = btn;
+            updateControls();
+        }
+
+        function startTracking() {
+            if (!selectedUserId) return;
+            fetch(`/start_tracking/salute/${selectedUserId}`)
+                .then(response => response.json())
+                .then(data => alert(data.status))
+                .finally(() => {
+                    window.location.href = `/salute/analysis/${selectedUserId}`;
+                });
+        }
+
+        function stopTracking() {
+            if (!selectedUserId) return;
+            fetch(`/stop_tracking/salute/${selectedUserId}`)
+                .then(response => response.json())
+                .then(data => alert(data.status));
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('/sessions/active')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(session => {
+                        const row = document.createElement('tr');
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = `${session.first_name} ${session.last_name}`;
+                        const idCell = document.createElement('td');
+                        idCell.textContent = session.user_id;
+                        const actionCell = document.createElement('td');
+                        const btn = document.createElement('button');
+                        btn.className = 'select-btn';
+                        btn.textContent = 'Select';
+                        btn.onclick = () => selectUser(session.user_id, btn);
+                        actionCell.appendChild(btn);
+                        row.appendChild(nameCell);
+                        row.appendChild(idCell);
+                        row.appendChild(actionCell);
+                        userList.appendChild(row);
+                    });
+                })
+                .catch(err => console.error('Failed to load active users', err));
+        });
+    </script>
 </body>
+
 </html>

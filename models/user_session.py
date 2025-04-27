@@ -54,9 +54,23 @@ def update_drill_type(user_id, drill_type: DrillType):
             user_session.drill_type = drill_type
             session.add(user_session)
             session.commit()
+            session.refresh(user_session)
+            return user_session.dict()
 
 def get_all_sessions_by_user_id(user_id):
     with Session(engine) as session:
         return session.exec(
             select(UserSession).where(UserSession.user_id == user_id)
         ).all()
+
+def get_last_active_session_by_user_id(user_id):
+    # Get recent Active session
+    with Session(engine) as session:
+        statement = (
+            select(UserSession)
+            .where(UserSession.user_id == user_id)
+            .order_by(UserSession.start_time.desc())
+        )
+        data = session.exec(statement).first()
+        print(data.dict())
+        return data.dict()

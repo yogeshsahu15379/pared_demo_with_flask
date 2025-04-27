@@ -17,7 +17,7 @@ class PDF(FPDF):
 def truncate_text(text, max_chars):
     return (text[:max_chars] + '...') if len(text) > max_chars else text
 
-def generate_pdf_from_table(table_name):
+def generate_pdf_from_table(table_name, user_id, session_id):
     allowed_tables = ['results','baju_swing_result','hill_march_result','kadamtal_result','tej_march_result']
     if table_name not in allowed_tables:
         raise ValueError("Invalid table name")
@@ -25,7 +25,9 @@ def generate_pdf_from_table(table_name):
     conn = sqlite3.connect('salute_results.db')
     cursor = conn.cursor()
     try:
-        cursor.execute(f"SELECT id, timestamp, angle, status, suggestion, screenshot_path FROM {table_name} ORDER BY id DESC LIMIT 10")
+        cursor.execute(
+            f"SELECT id, timestamp, angle, status, suggestion, screenshot_path FROM {table_name} WHERE user_id = {user_id} AND session_id = {session_id} ORDER BY id DESC LIMIT 10"
+        )
         data = cursor.fetchall()
     except Exception as e:
         raise RuntimeError(str(e))
@@ -84,6 +86,6 @@ def generate_pdf_from_table(table_name):
 
         pdf.ln()
 
-    file_path = os.path.join(BASE_DIR, f"{table_name}_report.pdf")
+    file_path = os.path.join(BASE_DIR, f"{user_id}_{table_name}_report.pdf")
     pdf.output(file_path)
     return file_path

@@ -6,6 +6,19 @@ import sqlite3
 import time
 import threading
 import queue
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--user_id", required=True)
+parser.add_argument("--user_session_id", required=True)
+
+args = parser.parse_args()
+
+user_id = args.user_id
+user_session_id = args.user_session_id
+
+print(f"Received user_id: {user_id}")
+print(f"Received user_session_id: {user_session_id}")
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -21,7 +34,9 @@ cursor.execute("""
         palm_angle REAL,
         status TEXT,
         suggestion TEXT,
-        screenshot_path TEXT
+        screenshot_path TEXT,
+        user_id TEXT,
+        session_id TEXT,
     )
 """)
 conn.commit()
@@ -203,8 +218,10 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                     screenshot_without_text = centered_image.copy()
                     cv2.imwrite(centered_image_path, image)
 
-                    cursor.execute("INSERT INTO results (timestamp, angle, status, suggestion, screenshot_path) VALUES (?, ?, ?, ?, ?)",
-                                (timestamp, angle, status, suggestion, centered_image_path))
+                    cursor.execute(
+                        "INSERT INTO results (timestamp, angle, status, suggestion, screenshot_path, user_id, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (timestamp, angle, status, suggestion, centered_image_path, user_id, user_session_id),
+                    )
                     conn.commit()
 
         except Exception as e:

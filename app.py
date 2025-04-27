@@ -37,6 +37,7 @@ from models.user_session import (
     create_user_session,
     end_user_session,
     get_all_active_user_sessions,
+    get_last_active_session_by_user_id,
     update_drill_type,
 )
 from services.pdf_generator import generate_pdf_from_table
@@ -47,6 +48,7 @@ from services.results_service import (
     get_hill_march_result,
     getTejChal_result,
 )
+from models.drill import drill_mapping
 
 
 app = Flask(__name__)
@@ -68,10 +70,11 @@ def admin_required(f):
     return decorated_function
 
 
-@app.route("/download-pdf/<table_name>")
-def download_pdf(table_name):
+@app.route("/download-pdf/<table_name>/<user_id>")
+def download_pdf(table_name, user_id):
     try:
-        filepath = generate_pdf_from_table(table_name)
+        last_active_session = get_last_active_session_by_user_id(user_id)
+        filepath = generate_pdf_from_table(table_name, user_id, last_active_session.get("id"))
         return send_file(filepath, as_attachment=True)
     except ValueError:
         return abort(400, description="Invalid table name")
@@ -168,9 +171,10 @@ def admin_panel():
     return render_template("admin_panel.html")
 
 
-@app.route("/result")
-def index():
-    results = get_results()
+@app.route("/result/<user_id>")
+def index(user_id):
+    last_active_session = get_last_active_session_by_user_id(user_id)
+    results = get_results(user_id, last_active_session.get('id'))
     return render_template(
         "result_page.html", results=results, tracking=bool(tracking_processes)
     )
@@ -212,9 +216,16 @@ def hill_march_result():
     )
 
 
-@app.route("/start_tracking/<mode>")
-def start_tracking(mode):
+@app.route("/start_tracking/<mode>/<user_id>")
+def start_tracking(mode, user_id):
     global tracking_processes
+
+    drill_type = drill_mapping.get(mode)
+
+    user_session = update_drill_type(user_id, drill_type)
+
+    if not user_session:
+        return jsonify({"error": "No session found"}), 400
 
     if mode not in [
         "salute",
@@ -237,14 +248,26 @@ def start_tracking(mode):
         "slowmarch": "slow_march_detection.py",
         "hillmarch": "hill_march_detection.py",
     }.get(mode)
-    tracking_processes[mode] = subprocess.Popen(["python", script])
+
+    tracking_processes[mode] = subprocess.Popen(
+        [
+            "python",
+            script,
+            "--user_id",
+            str(user_id),
+            "--user_session_id",
+            str(user_session.get("id")),
+        ]
+    )
 
     return jsonify({"status": f"{mode} tracking started"})
 
 
-@app.route("/stop_tracking/<mode>")
-def stop_tracking(mode):
+@app.route("/stop_tracking/<mode>/<user_id>")
+def stop_tracking(mode, user_id):
     global tracking_processes
+
+    end_user_session(user_id)
 
     if mode not in tracking_processes:
         return jsonify({"error": f"No tracking running for {mode}"}), 400
