@@ -27,7 +27,7 @@ mp_pose = mp.solutions.pose
 conn = sqlite3.connect("salute_results.db", check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS results (
+    CREATE TABLE IF NOT EXISTS results1 (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT,
         angle REAL,
@@ -36,7 +36,7 @@ cursor.execute("""
         suggestion TEXT,
         screenshot_path TEXT,
         user_id TEXT,
-        session_id TEXT,
+        session_id TEXT
     )
 """)
 conn.commit()
@@ -219,7 +219,7 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                     cv2.imwrite(centered_image_path, image)
 
                     cursor.execute(
-                        "INSERT INTO results (timestamp, angle, status, suggestion, screenshot_path, user_id, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        "INSERT INTO results1 (timestamp, angle, status, suggestion, screenshot_path, user_id, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
                         (timestamp, angle, status, suggestion, centered_image_path, user_id, user_session_id),
                     )
                     conn.commit()

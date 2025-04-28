@@ -72,5 +72,5 @@ def get_last_active_session_by_user_id(user_id):
             .order_by(UserSession.start_time.desc())
         )
         data = session.exec(statement).first()
-        print(data.dict())
-        return data.dict()
+        if data:
+            return data.dict()

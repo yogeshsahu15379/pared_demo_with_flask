@@ -18,7 +18,7 @@ def truncate_text(text, max_chars):
     return (text[:max_chars] + '...') if len(text) > max_chars else text
 
 def generate_pdf_from_table(table_name, user_id, session_id):
-    allowed_tables = ['results','baju_swing_result','hill_march_result','kadamtal_result','tej_march_result']
+    allowed_tables = ['results','results1','baju_swing_result','hill_march_result','kadamtal_result','tej_march_result']
     if table_name not in allowed_tables:
         raise ValueError("Invalid table name")
 

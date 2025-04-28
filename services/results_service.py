@@ -5,7 +5,7 @@ def get_results(user_id, session_id):
     conn = sqlite3.connect("salute_results.db")
     cursor = conn.cursor()
     cursor.execute(
-        f"SELECT * FROM results WHERE user_id = {user_id} AND session_id = {session_id} ORDER BY id DESC LIMIT 50"
+        f"SELECT * FROM results1 WHERE user_id = {user_id} AND session_id = {session_id} ORDER BY id DESC LIMIT 50"
     )
     data = cursor.fetchall()
     conn.close()

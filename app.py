@@ -1,3 +1,4 @@
+import os
 from flask import (
     Flask,
     session,
@@ -252,7 +253,7 @@ def start_tracking(mode, user_id):
     tracking_processes[mode] = subprocess.Popen(
         [
             "python",
-            script,
+            os.path.join("services",script),
             "--user_id",
             str(user_id),
             "--user_session_id",
