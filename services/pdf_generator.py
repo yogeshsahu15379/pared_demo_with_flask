@@ -1,8 +1,7 @@
 from fpdf import FPDF
 import sqlite3
 import os
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from config import config
 
 class PDF(FPDF):
     def __init__(self, title='report'):
@@ -18,7 +17,7 @@ def truncate_text(text, max_chars):
     return (text[:max_chars] + '...') if len(text) > max_chars else text
 
 def generate_pdf_from_table(table_name, user_id, session_id):
-    allowed_tables = ['results','results1','baju_swing_result','hill_march_result','kadamtal_result','tej_march_result']
+    allowed_tables = config.get('tables', [])
     if table_name not in allowed_tables:
         raise ValueError("Invalid table name")
 
@@ -75,7 +74,7 @@ def generate_pdf_from_table(table_name, user_id, session_id):
         pdf.cell(col_widths[4], row_height, suggestion, border=1, fill=True)
 
         # Screenshot Cell
-        full_path = os.path.join(BASE_DIR, screenshot_path)
+        full_path = os.path.join(config.get('basePath'), screenshot_path)
         if os.path.exists(full_path):
             x = pdf.get_x()
             y = pdf.get_y()
@@ -86,6 +85,8 @@ def generate_pdf_from_table(table_name, user_id, session_id):
 
         pdf.ln()
 
-    file_path = os.path.join(BASE_DIR, f"{user_id}_{table_name}_report.pdf")
+    file_path = os.path.join(
+        config.get("basePath"), f"{user_id}_{table_name}_report.pdf"
+    )
     pdf.output(file_path)
     return file_path

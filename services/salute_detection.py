@@ -1,4 +1,5 @@
 import math
+import os
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -7,6 +8,7 @@ import time
 import threading
 import queue
 import argparse
+from config import config
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--user_id", required=True)
@@ -212,7 +214,18 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                     last_store_time = current_time
 
                     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                    centered_image_path = f"static/screenshots/centered_salute_{int(time.time())}.jpg"
+                    centered_image_dir = os.path.join(
+                        config.get("basePath"),
+                        "static/screenshots",
+                    )
+
+                    # Create the directory if it doesn't exist
+                    os.makedirs(centered_image_dir, exist_ok=True)
+
+                    centered_image_path = os.path.join(
+                        centered_image_dir, 
+                        f"{user_session_id}_centered_salute_{int(time.time())}.jpg"
+                    )
 
                     # Save screenshot without suggestion
                     screenshot_without_text = centered_image.copy()
