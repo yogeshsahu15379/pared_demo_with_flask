@@ -23,7 +23,9 @@ def calculate_angle(a, b, c):
 
 def kadamtal_generate_frames():
     global frame_count
-    cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.10:554/1/2?transmode=unicast&profile=vam")   
+    # Lazy Import to prevent circular import
+    from models.drill import DRILL_CAMERA_URL_MAP, DrillType
+    cap = cv2.VideoCapture(DRILL_CAMERA_URL_MAP.get(DrillType.KADAMTAL))   
 
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
         while True:

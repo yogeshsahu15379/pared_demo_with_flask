@@ -10,10 +10,8 @@ from flask import (
 )
 
 from config import Config
-from live_video_module.salute_feed import generate_frames
-from live_video_module.kadamchal_feed import kadamtal_generate_frames
 from models import init_db
-from models.drill import DRILL_SLUG_MAP, DrillType, DRILL_TYPE_SCRIPT_MAP
+from models.drill import DRILL_SLUG_MAP, FEED_GENERATORS, DrillType, DRILL_TYPE_SCRIPT_MAP
 from models.user_session import create_user_session, get_all_active_user_sessions, update_drill_type
 
 
@@ -121,18 +119,13 @@ def stop_tracking(mode, user_id):
 
     return jsonify({"status": f"{mode} tracking stopped"})
 
-# STATIC ROUTES
-@app.route("/salute_live_feed")
-def salute_live_feed():
-    return Response(
-        generate_frames(), mimetype="multipart/x-mixed-replace; boundary=frame"
-    )
 
-@app.route("/kadamchal_live_feed")
-def kadamchal_live_feed():
-    return Response(
-        kadamtal_generate_frames(), mimetype="multipart/x-mixed-replace; boundary=frame"
-    )
+@app.route("/live_feed/<drill_slug>")
+def live_feed(drill_slug):
+    generator = FEED_GENERATORS.get(DRILL_SLUG_MAP.get(drill_slug))
+    if not generator:
+        abort(404)
+    return Response(generator(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 @app.route("/sessions", methods=["POST"])
 def create_session():

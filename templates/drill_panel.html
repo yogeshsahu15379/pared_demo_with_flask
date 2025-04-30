@@ -53,7 +53,7 @@
         <div class="main" style="text-align: center;">
             <h1 class="page-title">{{ drill_slug|capitalize }} Control Panel</h1>
             <h2>Live Feed</h2>
-            <img src="{{ url_for(feed_function) }}" alt="Live Feed" width="640" height="480">
+            <img src="{{ url_for('live_feed', drill_slug=drill_slug) }}" alt="Live Feed" width="640" height="480">
         </div>
         {% endif %}
 

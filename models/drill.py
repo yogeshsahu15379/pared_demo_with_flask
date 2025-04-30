@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Optional
 
 from sqlmodel import SQLModel, Field
+from live_video_module.kadamchal_feed import kadamtal_generate_frames
+from live_video_module.salute_feed import generate_frames
 
 class DrillType(str, Enum):
     SALUTE = "SALUTE"
@@ -62,7 +64,11 @@ class BaseDrill(SQLModel):
     user_id: str
     session_id: str
 
-# FRAME_GENERATORS = {
-#     "salute": generate_frames,
-#     "kadamchal": kadamtal_generate_frames,
-# }
+FEED_GENERATORS = {
+    DrillType.SALUTE: generate_frames,
+    DrillType.KADAMTAL: kadamtal_generate_frames,
+    # DrillType.BAJU_SWING: "baju_swing_detection.py",
+    # DrillType.TEJ_CHAL: "tej_chal_detection.py",
+    # DrillType.SLOW_CHAL: "slow_march_detection.py",
+    # DrillType.HILL_MARCH: "hill_march_detection.py",
+}
