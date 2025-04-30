@@ -12,16 +12,42 @@ class DrillType(str, Enum):
     SLOW_CHAL = "SLOW_CHAL"
     HILL_MARCH = "HILL_MARCH"
 
-# TEmp Mapping from input strings to DrillType
-drill_mapping = {
+    def __str__(self):
+        return self.value
+
+# TEMPORARY
+# Forward map: slug -> DrillType
+DRILL_SLUG_MAP = {
     "salute": DrillType.SALUTE,
-    "kadamchal": DrillType.KADAMTAL,
-    "baju_swing_1": DrillType.BAJU_SWING,
     "tejchal": DrillType.TEJ_CHAL,
+    "bajuswing": DrillType.BAJU_SWING,
+    "kadamchal": DrillType.KADAMTAL,
     "slowmarch": DrillType.SLOW_CHAL,
     "hillmarch": DrillType.HILL_MARCH,
 }
 
+# Reverse map: DrillType -> slug
+DRILL_TYPE_SLUG_MAP = {v: k for k, v in DRILL_SLUG_MAP.items()}
+
+# New mapping: DrillType -> Script file
+DRILL_TYPE_SCRIPT_MAP = {
+    DrillType.SALUTE: "salute_detection.py",
+    DrillType.KADAMTAL: "kadamchal_detection.py",
+    DrillType.BAJU_SWING: "baju_swing_detection.py",
+    DrillType.TEJ_CHAL: "tej_chal_detection.py",
+    DrillType.SLOW_CHAL: "slow_march_detection.py",
+    DrillType.HILL_MARCH: "hill_march_detection.py",
+}
+
+DRILL_CAMERA_URL_MAP = {
+    DrillType.SALUTE: "rtsp://admin:admin@123@192.168.0.14:554/1/1?transmode=unicast&profile=vam",
+    # DrillType.SALUTE: "rtsp://192.168.1.100:8080/h264_ulaw.sdp?transmode=unicast&profile=vam",
+    DrillType.KADAMTAL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    DrillType.BAJU_SWING: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    DrillType.TEJ_CHAL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    DrillType.SLOW_CHAL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    DrillType.HILL_MARCH: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+}
 
 class BaseDrill(SQLModel):
     id: Optional[int] = Field(default=None, primary_key=True)

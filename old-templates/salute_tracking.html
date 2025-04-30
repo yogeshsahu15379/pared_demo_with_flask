@@ -202,7 +202,7 @@
 
         function stopTracking() {
             if (!selectedUserId) return;
-            fetch(`/stop_tracking/salute/${selectedUserId}`)
+            fetch(`/stop_tracking/salute`)
                 .then(response => response.json())
                 .then(data => alert(data.status));
         }

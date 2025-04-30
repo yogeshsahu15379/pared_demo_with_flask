@@ -110,7 +110,6 @@
     <div class="analysis_container">
     <div class="container mt-5">
         <h1 style="text-align: center;">Salute Control Pannel</h1>
-        <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
 <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
         <a href="/result"><button type="button" class="btn result">View Result</button></a>
     </div>
@@ -121,9 +120,6 @@
     </div>
     
     <script>
-        function startTracking() {
-            fetch('/start_tracking/salute').then(response => response.json()).then(data => alert(data.status));
-        }
         function stopTracking() {
             fetch('/stop_tracking/salute').then(response => response.json()).then(data => alert(data.status));
             window.location.href = "/salute";

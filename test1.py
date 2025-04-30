@@ -1,49 +1,37 @@
-import asyncio
-import socket
-import websockets
+import traceback
+from zk import ZK, const
 
-DEVICE_IP = "192.168.0.100"
-DEVICE_PORT = 5005
+conn = None
+# create ZK instance
+zk = ZK(
+    "192.168.0.102", port=5005, timeout=5, password=0, force_udp=False, ommit_ping=False
+)
+try:
+    # connect to device
+    conn = zk.connect()
+    # disable device, this method ensures no activity on the device while the process is run
+    conn.disable_device()
+    # another commands will be here!
+    # Example: Get All Users
+    users = conn.get_users()
+    for user in users:
+        privilege = "User"
+        if user.privilege == const.USER_ADMIN:
+            privilege = "Admin"
+        print("+ UID #{}".format(user.uid))
+        print("  Name       : {}".format(user.name))
+        print("  Privilege  : {}".format(privilege))
+        print("  Password   : {}".format(user.password))
+        print("  Group ID   : {}".format(user.group_id))
+        print("  User  ID   : {}".format(user.user_id))
 
-WS_SERVER_HOST = "0.0.0.0"
-WS_SERVER_PORT = 8765
-
-
-# Connect to fingerprint device over TCP
-def connect_to_device():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((DEVICE_IP, DEVICE_PORT))
-    return s
-
-
-# Coroutine to handle WebSocket connections
-async def websocket_handler(websocket):
-    print(f"Client connected: {websocket.remote_address}")
-
-    device_socket = connect_to_device()
-
-    async def device_to_websocket():
-        while True:
-            data = device_socket.recv(1024)
-            if not data:
-                break
-            await websocket.send(data.hex())  # send data to client
-
-    async def websocket_to_device():
-        async for message in websocket:
-            device_socket.sendall(bytes.fromhex(message))  # send data to device
-
-    await asyncio.gather(device_to_websocket(), websocket_to_device())
-
-    device_socket.close()
-
-
-# Main: Start WebSocket Server
-async def main():
-    async with websockets.serve(websocket_handler, WS_SERVER_HOST, WS_SERVER_PORT):
-        print(f"WebSocket Server running at ws://{WS_SERVER_HOST}:{WS_SERVER_PORT}")
-        await asyncio.Future()  # run forever
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    # Test Voice: Say Thank You
+    conn.test_voice()
+    # re-enable device after all commands already executed
+    conn.enable_device()
+except Exception as e:
+    traceback.print_exc()
+    print("Process terminate : {}".format(e))
+finally:
+    if conn:
+        conn.disconnect()

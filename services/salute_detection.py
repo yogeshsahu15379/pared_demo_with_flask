@@ -8,28 +8,32 @@ import time
 import threading
 import queue
 import argparse
-from config import config
+from config import Config
+from models.drill import DRILL_CAMERA_URL_MAP, DRILL_SLUG_MAP
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--user_id", required=True)
 parser.add_argument("--user_session_id", required=True)
+parser.add_argument("--table_name", required=True)
 
 args = parser.parse_args()
 
 user_id = args.user_id
 user_session_id = args.user_session_id
+table_name = args.table_name
 
 print(f"Received user_id: {user_id}")
 print(f"Received user_session_id: {user_session_id}")
+print(f"Received table_name: {table_name}")
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 # ✅ Database Connection
-conn = sqlite3.connect("salute_results.db", check_same_thread=False)
+conn = sqlite3.connect(Config.DB_FILE_NAME, check_same_thread=False)
 cursor = conn.cursor()
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS results1 (
+cursor.execute(f"""
+    CREATE TABLE IF NOT EXISTS {table_name} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT,
         angle REAL,
@@ -59,7 +63,9 @@ def get_distance(pose1, pose2):
     return round(math.sqrt((pose2[0] - pose1[0])**2 + (pose2[1] - pose1[1])**2) * 100,2)
 
 # ✅ Initialize Camera
-cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.14:554/1/1?transmode=unicast&profile=vam")  # Replace with your video source
+cap = cv2.VideoCapture(
+    DRILL_CAMERA_URL_MAP.get(DRILL_SLUG_MAP.get(table_name))
+)  # Replace with your video source
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -215,8 +221,8 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
 
                     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
                     centered_image_dir = os.path.join(
-                        config.get("basePath"),
-                        "static/screenshots",
+                        Config.BASE_DIR,
+                        "screenshots",
                     )
 
                     # Create the directory if it doesn't exist
@@ -232,7 +238,7 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                     cv2.imwrite(centered_image_path, image)
 
                     cursor.execute(
-                        "INSERT INTO results1 (timestamp, angle, status, suggestion, screenshot_path, user_id, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        f"INSERT INTO {table_name} (timestamp, angle, status, suggestion, screenshot_path, user_id, session_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
                         (timestamp, angle, status, suggestion, centered_image_path, user_id, user_session_id),
                     )
                     conn.commit()

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %} {{ drill_slug }} {% endblock %}
+
+{% block content %}
+<div>
+    <h1 class="page-title">{{ drill_slug|capitalize }} Control Panel</h1>
+    <div class="layout">
+
+        {% if not analysis_mode %}
+        <!-- ------------------ CONTROL PANEL ------------------ -->
+        <div class="sidebar" id="userSection">
+            <h2>Active Users</h2>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>User ID</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userList">
+                    <!-- Rows inserted dynamically -->
+                </tbody>
+            </table>
+        </div>
+        <div class="main" id="controlSection">
+            <div class="button-group">
+                <button id="startBtn" class="btn btn-custom" onclick="startTracking()" disabled>Start Tracking</button>
+                <button id="stopBtn" class="btn stop" onclick="stopTracking()" disabled>Stop Tracking</button>
+                <a id="viewResultLink" href="#">
+                    <button id="resultBtn" class="btn result" disabled>View Result</button>
+                </a>
+                <a id="downloadLink" href="#" download>
+                    <button id="downloadBtn" class="btn" disabled>📥 Download PDF</button>
+                </a>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- ------------------ ANALYSIS MODE ------------------ -->
+        <div class="sidebar" id="controlSection">
+            <h2>Controls</h2>
+            <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
+            <a href="/{{ drill_slug }}">
+                <button type="button" class="btn result">Back to Panel</button>
+            </a>
+            <a href="/result">
+                <button type="button" class="btn result">View Result</button>
+            </a>
+        </div>
+
+        <div class="main" style="text-align: center;">
+            <h2>Live Feed</h2>
+            <img src="{{ url_for(feed_function) }}" alt="Live Feed" width="640" height="480">
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    let selectedUserId = null;
+    let prevButton = null;
+
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const resultBtn = document.getElementById('resultBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const viewResultLink = document.getElementById('viewResultLink');
+    const downloadLink = document.getElementById('downloadLink');
+    const userList = document.getElementById('userList');
+
+    function updateControls() {
+        const enabled = !!selectedUserId;
+        startBtn.disabled = !enabled;
+        stopBtn.disabled = !enabled;
+        resultBtn.disabled = !enabled;
+        downloadBtn.disabled = !enabled;
+        if (enabled) {
+            viewResultLink.href = `/result/${selectedUserId}`;
+            downloadLink.href = `/results/${selectedUserId}/download-pdf`;
+        }
+    }
+
+    function selectUser(userId, btn) {
+        if (prevButton) prevButton.disabled = false;
+        selectedUserId = userId;
+        btn.disabled = true;
+        prevButton = btn;
+        updateControls();
+    }
+
+    function startTracking() {
+        if (!selectedUserId) return;
+        fetch(`/start_tracking/{{ drill_slug }}/` + selectedUserId)
+            .then(response => response.json())
+            .then(data => alert(data.status))
+            .finally(() => {
+                window.location.href = `/{{ drill_slug }}/${selectedUserId}/analysis`;
+            });
+    }
+
+    function stopTracking() {
+        console.log()
+        if (!selectedUserId) {
+            fetch(`/stop_tracking/{{ drill_slug }}/{{ user_id }}`)
+                .then(response => response.json())
+                .then(data => alert(data.status));
+        }
+        else {
+            fetch(`/stop_tracking/{{ drill_slug }}/` + selectedUserId)
+                .then(response => response.json())
+                .then(data => alert(data.status));
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fetch('/sessions/active')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(session => {
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = `${session.first_name} ${session.last_name}`;
+                    const idCell = document.createElement('td');
+                    idCell.textContent = session.user_id;
+                    const actionCell = document.createElement('td');
+                    const btn = document.createElement('button');
+                    btn.className = 'select-btn';
+                    btn.textContent = 'Select';
+                    btn.onclick = () => selectUser(session.user_id, btn);
+                    actionCell.appendChild(btn);
+                    row.appendChild(nameCell);
+                    row.appendChild(idCell);
+                    row.appendChild(actionCell);
+                    userList.appendChild(row);
+                });
+            })
+            .catch(err => console.error('Failed to load active users', err));
+    });
+    function stopTracking() {
+        fetch(`/stop_tracking/{{ drill_slug }}`)
+            .then(response => response.json())
+            .then(data => alert(data.status))
+            .finally(() => {
+                window.location.href = "/{{ drill_slug }}";
+            });
+    }
+</script>
+{% endblock %}

@@ -2,8 +2,8 @@ import datetime
 from sqlmodel import SQLModel, Field, Session, select
 from typing import Optional
 
-from models.drill import DrillType
-from models import engine
+from models.drill import DrillType, DRILL_SLUG_MAP
+from config import engine
 
 class UserSession(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

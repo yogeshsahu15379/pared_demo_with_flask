@@ -2,6 +2,8 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
+from models.drill import DRILL_CAMERA_URL_MAP, DrillType
+
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
@@ -24,7 +26,7 @@ def calculate_angle(a, b, c):
 
 def generate_frames():
     global frame_count
-    cap = cv2.VideoCapture("rtsp://admin:admin@123@192.168.0.14:554/1/2?transmode=unicast&profile=vam")  # Replace with your video source
+    cap = cv2.VideoCapture(DRILL_CAMERA_URL_MAP.get(DrillType.SALUTE))  # Replace with your video source
 
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
             while True:
