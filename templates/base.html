@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artificial Intelligence Drill Nursery</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #007bff;
@@ -21,6 +22,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
 
         body {
@@ -55,9 +57,11 @@
         main {
             /* padding: 3rem 1rem; */
             text-align: center;
+            min-height: 100vh;
         }
 
         main h2 {
+            margin-top: 2rem;
             color: var(--secondary-color);
             font-size: 1.5rem;
             margin-bottom: 2.5rem;
@@ -126,6 +130,10 @@
             text-align: center;
             padding: 1rem;
             margin-top: 3rem;
+            position: relative;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
         }
 
         .layout {
@@ -160,6 +168,39 @@
 
         .user-table th {
             font-weight: bold;
+        }
+
+        .results-table-wrapper {
+            overflow-x: auto;
+            margin-top: 2rem;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-background);
+            box-shadow: 0 6px 12px var(--shadow-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        .results-table th {
+            background-color: var(--primary-color);
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+
+        .results-table tr:hover {
+            background-color: #f1f1f1;
         }
 
         .select-btn {
@@ -268,6 +309,7 @@
 
             main {
                 padding: 2rem 1rem;
+                min-height: 100vh;
             }
 
             .card-container {
@@ -282,6 +324,7 @@
             h2 {
                 font-size: 1rem;
             }
+
             .page-title {
                 font-size: 1.5rem;
             }
@@ -292,6 +335,7 @@
                 width: 100%;
                 height: auto;
             }
+
             .sidebar {
                 border-right: none;
                 border-bottom: 1px solid #ddd;

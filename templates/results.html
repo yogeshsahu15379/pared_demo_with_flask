@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+
+    {% if users %}
+    <h2>Select a User</h2>
+    <div class="card-container">
+        {% for u in users %}
+        <a href="{{ url_for('results', user_id=u.user_id) }}" class="card">
+            <i class="fas fa-user"></i>
+            <h3>{{ u.first_name }} {{ u.last_name }}</h3>
+            <p>User ID: {{ u.user_id }}</p>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% elif sessions is not none %}
+    <!-- TODO : It's escaping this condition if user_sesions is [] -->
+    <h2>Sessions for {{ user.user_id }}</h2>
+    <div class="card-container">
+        {% for s in sessions %}
+        <a href="{{ url_for('results', user_id=user.user_id, session_id=s.id) }}" class="card">
+            <i class="fas fa-clock"></i>
+            <h3>{{ s.start_time.strftime("%Y-%m-%d %H:%M") }}</h3>
+            <p>{{ s.drill_type or ("Session " + s.id|string) }}</p>
+        </a>
+        {% endfor %}
+    </div>
+    <p>
+        <!-- <a href="{{ url_for('results') }}" class="btn">← Back to users</a> -->
+    </p>
+
+    {% else %}
+    <h2>Results for {{ user.user_id }}
+        on {{ session.start_time.strftime("%Y-%m-%d %H:%M") }}</h2>
+
+    {% if results %}
+    <div class="results-table-wrapper">
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Metric</th>
+                    <th>Value</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ r.metric_name }}</td>
+                    <td>{{ r.value }}</td>
+                    <td>{{ r.timestamp.strftime("%H:%M:%S") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No results found for this session.</p>
+    {% endif %}
+
+    <!-- <p>
+        <a href="{{ url_for('results', user_id=user.user_id) }}" class="btn result">← Back to sessions</a><br>
+        <a href="{{ url_for('results') }}" class="btn">← Back to users</a>
+    </p> -->
+    {% endif %}
+
+
+</div>
+{% endblock %}

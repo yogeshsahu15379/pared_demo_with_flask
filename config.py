@@ -12,4 +12,4 @@ class Config:
     # PATHS
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-engine = engine = create_engine(f"sqlite:///{Config.DB_FILE_NAME}", echo=True)
+engine = create_engine(f"sqlite:///{Config.DB_FILE_NAME}", echo=False)

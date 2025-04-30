@@ -74,3 +74,28 @@ def get_last_active_session_by_user_id(user_id):
         data = session.exec(statement).first()
         if data:
             return data.dict()
+
+def get_all_users(drill_type: DrillType | None = None) -> list[dict]:
+    with Session(engine) as db:
+        stmt = select(
+            UserSession.user_id, UserSession.first_name, UserSession.last_name
+        )
+        if drill_type:
+            stmt = stmt.where(UserSession.drill_type == drill_type)
+        stmt = stmt.distinct(UserSession.user_id)
+        raw = db.exec(stmt).all()
+        return [{"user_id": u[0], "first_name": u[1], "last_name": u[2]} for u in raw]
+    
+def get_sessions_for_user(
+    user_id: str, drill_type: DrillType | None = None
+) -> list[UserSession]:
+    with Session(engine) as db:
+        stmt = select(UserSession).where(UserSession.user_id == user_id)
+        if drill_type:
+            stmt = stmt.where(UserSession.drill_type == drill_type)
+        stmt = stmt.order_by(UserSession.start_time.desc())
+        return db.exec(stmt).all()
+    
+def get_session_by_id(session_id: int) -> UserSession:
+    with Session(engine) as db:
+        return db.get(UserSession, session_id)

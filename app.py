@@ -11,8 +11,21 @@ from flask import (
 
 from config import Config
 from models import init_db
-from models.drill import DRILL_SLUG_MAP, FEED_GENERATORS, DrillType, DRILL_TYPE_SCRIPT_MAP
-from models.user_session import create_user_session, get_all_active_user_sessions, update_drill_type
+from models.drill import (
+    DRILL_SLUG_MAP,
+    FEED_GENERATORS,
+    DrillType,
+    DRILL_TYPE_SCRIPT_MAP,
+)
+from models.user_session import (
+    create_user_session,
+    get_all_active_user_sessions,
+    get_all_users,
+    get_session_by_id,
+    get_sessions_for_user,
+    update_drill_type,
+)
+from services.drill_service import get_drill_rows_for_session
 
 
 def create_app():
@@ -24,9 +37,11 @@ def create_app():
 
     return app
 
+
 app = create_app()
 
 tracking_processes = {}
+
 
 @app.route("/")
 def home():
@@ -38,12 +53,10 @@ def drill_panel(drill_slug):
     drill_type = DRILL_SLUG_MAP.get(drill_slug)
     if not drill_type:
         abort(404)
-
-    feed_function = f"{drill_slug}_live_feed"
     return render_template(
         "drill_panel.html",
         drill_slug=drill_slug,
-        feed_function=feed_function,
+        feed_function="live_feed",
         analysis_mode=False,  # Normal control panel
     )
 
@@ -55,11 +68,10 @@ def drill_analysis(drill_slug, user_id):
         if not drill_type:
             abort(404)
 
-        feed_function = f"{drill_slug}_live_feed"
         return render_template(
             "drill_panel.html",
             drill_slug=drill_slug,
-            feed_function=feed_function,
+            feed_function="live_feed",
             analysis_mode=True,  # Analysis (feed view) mode
             user_id=user_id,
         )
@@ -127,6 +139,64 @@ def live_feed(drill_slug):
         abort(404)
     return Response(generator(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
+
+@app.route("/results")
+def results():
+    drill_slug = request.args.get("drill_slug", type=str)
+    if not drill_slug:
+        # Optionally redirect to some default or error
+        return "Missing drill_slug", 400
+
+    drill_type = DRILL_SLUG_MAP.get(drill_slug)
+    if not drill_type:
+        return f"Unknown drill_slug '{drill_slug}'", 400
+
+    user_id = request.args.get("user_id", type=str)
+    session_id = request.args.get("session_id", type=str)
+
+    # 1) no user_id → list users
+    if not user_id:
+        users = get_all_users(drill_type=drill_type)
+        return render_template(
+            "results.html",
+            users=users,
+            user=None,
+            sessions=None,
+            results=None,
+            drill_slug=drill_slug,
+        )
+
+    # 2) user_id but no session_id → list sessions
+    user_sessions = get_sessions_for_user(user_id, drill_type=drill_type)
+    print("Sessions: ", user_sessions)
+    if not session_id:
+        return render_template(
+            "results.html",
+            users=None,
+            user={"user_id": user_id},
+            sessions=user_sessions,  # ← pass it under the name the template uses
+            results=None,
+            drill_slug=drill_slug,
+        )
+
+    # 3) both → drill rows
+    rows = get_drill_rows_for_session(
+        user_id=user_id, session_id=session_id, drill_slug=drill_slug
+    )
+    print(rows)
+    session_obj = get_session_by_id(session_id, drill_type)
+    print(session_obj)
+    return render_template(
+        "results.html",
+        users=None,
+        user={"user_id": user_id},
+        sessions=None,
+        session=session_obj,  # ← now has .id and .started_at
+        results=rows,
+        drill_slug=drill_slug,
+    )
+
+
 @app.route("/sessions", methods=["POST"])
 def create_session():
     data = request.json
@@ -142,10 +212,12 @@ def create_session():
 
     return jsonify({"message": "User session created successfully."}), 201
 
+
 @app.route("/sessions/active", methods=["GET"])
 def get_active_sessions():
     sessions = get_all_active_user_sessions()
     return jsonify([session.dict() for session in sessions]), 200
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=80)
