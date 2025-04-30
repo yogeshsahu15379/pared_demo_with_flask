@@ -11,6 +11,7 @@ from flask import (
 
 from config import Config
 from live_video_module.salute_feed import generate_frames
+from live_video_module.kadamchal_feed import kadamtal_generate_frames
 from models import init_db
 from models.drill import DRILL_SLUG_MAP, DrillType, DRILL_TYPE_SCRIPT_MAP
 from models.user_session import create_user_session, get_all_active_user_sessions, update_drill_type
@@ -125,6 +126,12 @@ def stop_tracking(mode, user_id):
 def salute_live_feed():
     return Response(
         generate_frames(), mimetype="multipart/x-mixed-replace; boundary=frame"
+    )
+
+@app.route("/kadamchal_live_feed")
+def kadamchal_live_feed():
+    return Response(
+        kadamtal_generate_frames(), mimetype="multipart/x-mixed-replace; boundary=frame"
     )
 
 @app.route("/sessions", methods=["POST"])

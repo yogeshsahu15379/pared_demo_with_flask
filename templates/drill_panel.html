@@ -4,7 +4,6 @@
 
 {% block content %}
 <div>
-    <h1 class="page-title">{{ drill_slug|capitalize }} Control Panel</h1>
     <div class="layout">
 
         {% if not analysis_mode %}
@@ -25,6 +24,7 @@
             </table>
         </div>
         <div class="main" id="controlSection">
+            <h1 class="page-title">{{ drill_slug|capitalize }} Control Panel</h1>
             <div class="button-group">
                 <button id="startBtn" class="btn btn-custom" onclick="startTracking()" disabled>Start Tracking</button>
                 <button id="stopBtn" class="btn stop" onclick="stopTracking()" disabled>Stop Tracking</button>
@@ -51,6 +51,7 @@
         </div>
 
         <div class="main" style="text-align: center;">
+            <h1 class="page-title">{{ drill_slug|capitalize }} Control Panel</h1>
             <h2>Live Feed</h2>
             <img src="{{ url_for(feed_function) }}" alt="Live Feed" width="640" height="480">
         </div>
@@ -105,12 +106,18 @@
         if (!selectedUserId) {
             fetch(`/stop_tracking/{{ drill_slug }}/{{ user_id }}`)
                 .then(response => response.json())
-                .then(data => alert(data.status));
+                .then(data => alert(data.status))
+                .finally(()=>{
+                    window.location.href = "/{{ drill_slug }}";
+                });
         }
         else {
-            fetch(`/stop_tracking/{{ drill_slug }}/{{ user_id }}` + selectedUserId)
+            fetch(`/stop_tracking/{{ drill_slug }}/` + selectedUserId)
                 .then(response => response.json())
-                .then(data => alert(data.status));
+                .then(data => alert(data.status))
+                .finally(()=>{
+                    window.location.href = "/{{ drill_slug }}";
+                });
         }
     }
 

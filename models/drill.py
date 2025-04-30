@@ -41,12 +41,11 @@ DRILL_TYPE_SCRIPT_MAP = {
 
 DRILL_CAMERA_URL_MAP = {
     DrillType.SALUTE: "rtsp://admin:admin@123@192.168.0.14:554/1/2?transmode=unicast&profile=vam",
-    # DrillType.SALUTE: "rtsp://192.168.1.100:8080/h264_ulaw.sdp?transmode=unicast&profile=vam",
-    DrillType.KADAMTAL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    DrillType.BAJU_SWING: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    DrillType.TEJ_CHAL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    DrillType.SLOW_CHAL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    DrillType.HILL_MARCH: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    DrillType.KADAMTAL: "rtsp://admin:admin@123@192.168.0.10:554/1/2?transmode=unicast&profile=vam",
+    DrillType.BAJU_SWING: "rtsp://admin:admin@123@192.168.0.18:554/1/1?transmode=unicast&profile=va",
+    DrillType.TEJ_CHAL: "rtsp://admin:admin@123@192.168.0.16:554/1/1?transmode=unicast&profile=va",
+    DrillType.SLOW_CHAL: "rtsp://admin:admin@123@192.168.0.11:554/1/2?transmode=unicast&profile=va",
+    DrillType.HILL_MARCH: "rtsp://admin:admin@123@192.168.0.13:554/1/2?transmode=unicast&profile=va",
 }
 
 class BaseDrill(SQLModel):
@@ -62,3 +61,8 @@ class BaseDrill(SQLModel):
     drill_type: DrillType
     user_id: str
     session_id: str
+
+# FRAME_GENERATORS = {
+#     "salute": generate_frames,
+#     "kadamchal": kadamtal_generate_frames,
+# }
