@@ -102,14 +102,13 @@
     }
 
     function stopTracking() {
-        console.log()
         if (!selectedUserId) {
             fetch(`/stop_tracking/{{ drill_slug }}/{{ user_id }}`)
                 .then(response => response.json())
                 .then(data => alert(data.status));
         }
         else {
-            fetch(`/stop_tracking/{{ drill_slug }}/` + selectedUserId)
+            fetch(`/stop_tracking/{{ drill_slug }}/{{ user_id }}` + selectedUserId)
                 .then(response => response.json())
                 .then(data => alert(data.status));
         }
@@ -139,13 +138,5 @@
             })
             .catch(err => console.error('Failed to load active users', err));
     });
-    function stopTracking() {
-        fetch(`/stop_tracking/{{ drill_slug }}`)
-            .then(response => response.json())
-            .then(data => alert(data.status))
-            .finally(() => {
-                window.location.href = "/{{ drill_slug }}";
-            });
-    }
 </script>
 {% endblock %}

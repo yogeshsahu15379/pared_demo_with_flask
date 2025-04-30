@@ -40,7 +40,7 @@ DRILL_TYPE_SCRIPT_MAP = {
 }
 
 DRILL_CAMERA_URL_MAP = {
-    DrillType.SALUTE: "rtsp://admin:admin@123@192.168.0.14:554/1/1?transmode=unicast&profile=vam",
+    DrillType.SALUTE: "rtsp://admin:admin@123@192.168.0.14:554/1/2?transmode=unicast&profile=vam",
     # DrillType.SALUTE: "rtsp://192.168.1.100:8080/h264_ulaw.sdp?transmode=unicast&profile=vam",
     DrillType.KADAMTAL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     DrillType.BAJU_SWING: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",

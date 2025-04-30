@@ -8,8 +8,8 @@ import time
 import threading
 import queue
 import argparse
-from config import Config
-from models.drill import DRILL_CAMERA_URL_MAP, DRILL_SLUG_MAP
+# from config import Config
+# from models.drill import DRILL_CAMERA_URL_MAP, DRILL_SLUG_MAP
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--user_id", required=True)
@@ -17,6 +17,8 @@ parser.add_argument("--user_session_id", required=True)
 parser.add_argument("--table_name", required=True)
 
 args = parser.parse_args()
+
+# print(Config,"+++++++")
 
 user_id = args.user_id
 user_session_id = args.user_session_id
@@ -30,7 +32,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 # ✅ Database Connection
-conn = sqlite3.connect(Config.DB_FILE_NAME, check_same_thread=False)
+conn = sqlite3.connect("test_db.db", check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute(f"""
     CREATE TABLE IF NOT EXISTS {table_name} (
@@ -64,7 +66,7 @@ def get_distance(pose1, pose2):
 
 # ✅ Initialize Camera
 cap = cv2.VideoCapture(
-    DRILL_CAMERA_URL_MAP.get(DRILL_SLUG_MAP.get(table_name))
+    "rtsp://admin:admin@123@192.168.0.14:554/1/2?transmode=unicast&profile=vam"
 )  # Replace with your video source
 # cap = cv2.VideoCapture(0)  # ✅ Webcam
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -221,7 +223,7 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
 
                     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
                     centered_image_dir = os.path.join(
-                        Config.BASE_DIR,
+                        os.path.dirname(os.path.abspath(__file__)),
                         "screenshots",
                     )
 
@@ -256,33 +258,3 @@ cap.release()
 cv2.destroyAllWindows()
 conn.close()
 
-
-# pose_logic.py
-# def generate_frames():
-#     cap = cv2.VideoCapture("rtsp://192.168.1.23:8080/h264_ulaw.sdp")
-#     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-#     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-
-#     mp_pose = mp.solutions.pose
-#     pose = mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3)
-
-#     while True:
-#         success, frame = cap.read()
-#         if not success:
-#             break
-
-#         # Pose detection logic (minimal ya full) – abhi ke liye sirf draw kar raha hoon
-#         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#         results = pose.process(rgb)
-
-#         if results.pose_landmarks:
-#             mp.solutions.drawing_utils.draw_landmarks(
-#                 frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-
-#         # Encode frame to JPEG
-#         ret, buffer = cv2.imencode('.jpg', frame)
-#         frame = buffer.tobytes()
-
-#         # Yield frame for streaming
-#         yield (b'--frame\r\n'
-#                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
