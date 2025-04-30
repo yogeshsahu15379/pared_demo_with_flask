@@ -222,16 +222,20 @@ with mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7) as 
                     last_store_time = current_time
 
                     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                    centered_image_dir = os.path.join(
-                        os.path.dirname(os.path.abspath(__file__)),
-                        "screenshots",
-                    )
+                    # Get current file's directory
+                    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+                    # Go one level up
+                    parent_dir = os.path.dirname(current_dir)
+
+                    # Create screenshots path in the parent folder
+                    screenshot_dir = os.path.join(parent_dir, "screenshots")
 
                     # Create the directory if it doesn't exist
-                    os.makedirs(centered_image_dir, exist_ok=True)
+                    os.makedirs(screenshot_dir, exist_ok=True)
 
                     centered_image_path = os.path.join(
-                        centered_image_dir, 
+                        screenshot_dir, 
                         f"{user_session_id}_centered_salute_{int(time.time())}.jpg"
                     )
 
