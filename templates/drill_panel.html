@@ -63,6 +63,7 @@
 <script>
     let selectedUserId = null;
     let prevButton = null;
+    let selectedSessionId = null;
 
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -79,14 +80,15 @@
         resultBtn.disabled = !enabled;
         downloadBtn.disabled = !enabled;
         if (enabled) {
-            viewResultLink.href = `/result/${selectedUserId}`;
+            viewResultLink.href = `/results?user_id=${selectedUserId}&drill_slug={{ drill_slug }}&session_id=${selectedSessionId}`;
             downloadLink.href = `/results/${selectedUserId}/download-pdf`;
         }
     }
 
-    function selectUser(userId, btn) {
+    function selectUser(userId, sessionId, btn) {
         if (prevButton) prevButton.disabled = false;
         selectedUserId = userId;
+        selectedSessionId = sessionId;
         btn.disabled = true;
         prevButton = btn;
         updateControls();
@@ -135,7 +137,7 @@
                     const btn = document.createElement('button');
                     btn.className = 'select-btn';
                     btn.textContent = 'Select';
-                    btn.onclick = () => selectUser(session.user_id, btn);
+                    btn.onclick = () => selectUser(session.user_id, session.id, btn);
                     actionCell.appendChild(btn);
                     row.appendChild(nameCell);
                     row.appendChild(idCell);

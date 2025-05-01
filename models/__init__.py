@@ -7,3 +7,4 @@ def init_db(app):
     # Create the engine
     engine = create_engine(sqlite_url, echo=True)
     SQLModel.metadata.create_all(engine)
+

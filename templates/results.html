@@ -1,73 +1,157 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-
-    {% if users %}
-    <h2>Select a User</h2>
-    <div class="card-container">
-        {% for u in users %}
-        <a href="{{ url_for('results', user_id=u.user_id) }}" class="card">
-            <i class="fas fa-user"></i>
-            <h3>{{ u.first_name }} {{ u.last_name }}</h3>
-            <p>User ID: {{ u.user_id }}</p>
-        </a>
-        {% endfor %}
-    </div>
-
-    {% elif sessions is not none %}
-    <!-- TODO : It's escaping this condition if user_sesions is [] -->
-    <h2>Sessions for {{ user.user_id }}</h2>
-    <div class="card-container">
-        {% for s in sessions %}
-        <a href="{{ url_for('results', user_id=user.user_id, session_id=s.id) }}" class="card">
-            <i class="fas fa-clock"></i>
-            <h3>{{ s.start_time.strftime("%Y-%m-%d %H:%M") }}</h3>
-            <p>{{ s.drill_type or ("Session " + s.id|string) }}</p>
-        </a>
-        {% endfor %}
-    </div>
-    <p>
-        <!-- <a href="{{ url_for('results') }}" class="btn">← Back to users</a> -->
-    </p>
-
-    {% else %}
-    <h2>Results for {{ user.user_id }}
-        on {{ session.start_time.strftime("%Y-%m-%d %H:%M") }}</h2>
-
+<div id="userSection" class="container">
+    <!-- Displaying resuts here -->
     {% if results %}
-    <div class="results-table-wrapper">
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Metric</th>
-                    <th>Value</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in results %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ r.metric_name }}</td>
-                    <td>{{ r.value }}</td>
-                    <td>{{ r.timestamp.strftime("%H:%M:%S") }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <h2>{{session.drill_type}} Results</h2>
+    <div class="card-container">
+        <p><strong>User Id: </strong>{{ user.user_id}}</p>
+        <p><strong>Name: </strong>{{ user.first_name }} {{ user.last_name }}</p>
+        <p><strong>Session Id: </strong>{{ session.id }}</p>
+        <p><strong>Start Time: </strong>{{ session.start_time.strftime('%b %d, %Y %I:%M %p') if session.start_time else 'N/A' }}</p>
+        <p><strong>End Time: </strong>{{ session.end_time.strftime('%b %d, %Y %I:%M %p') if session.end_time else 'Ongoing' }}</p>
+        <p><strong>Status: </strong>{{ 'Active' if session.active else 'Inactive' }}</p>
     </div>
-    {% else %}
-    <p>No results found for this session.</p>
+    <table class="user-table results-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Timestamp</th>
+                <th>Status</th>
+                <th>Suggestion</th>
+                <th>Angles</th>
+                <th>Screenshot</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr class="{{ 'bg-green-50' if result.status == 'Salute is Correct' else 'bg-red-50' }}">
+                <td>{{ loop.index }}</td>
+                <td>{{ result.timestamp }}</td>
+                <td class="font-semibold {{ 'text-green-600' if result.status == 'Salute is Correct' else 'text-red-600' }}">
+                    {{ result.status }}
+                </td>
+                <td>{{ result.suggestion }}</td>
+                <td>{{ result.angle }}</td>
+                <td>
+                    {% if result.screenshot_path %}
+                    <a href="{{ url_for('static', filename=result.screenshot_path.split('static\\')[-1]) }}" target="_blank">
+                        <img src="{{ url_for('static', filename=result.screenshot_path.split('static\\')[-1]) }}"
+                            alt="Screenshot" style="height: 60px; border-radius: 4px;">
+                    </a>
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+    {% elif user and session %}
+    <h2>{{session.drill_type}} Results</h2>
+    <p>
+        No Results are available for now
+    </p>
+    {% endif %}
+    <!-- Displaying User Sessions Here -->
+    {% if sessions %}
+    <h2>User Sessions</h2>
+    <div class="card-container">
+        <p><strong>User Id: </strong>{{ user.user_id}}</p>
+        <p><strong>Name: </strong>{{ user.first_name }} {{ user.last_name }}</p>
+    </div>
+    <table class="user-table results-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Session Id</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Drill Type</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="userList">
+            {% for session in sessions %}
+            <tr>
+                <td>
+                    <i class="fas fa-user"></i>
+                </td>
+                <td>
+                    <h3>{{ session.id }}</h3>
+                </td>
+                <td>
+                    <p>{{ session.start_time.strftime('%b %d, %Y %I:%M %p') if session.start_time else 'N/A' }}</p>
+                </td>
+                <td>
+                    <p>{{ session.end_time.strftime('%b %d, %Y %I:%M %p') if session.end_time else 'Ongoing' }}</p>
+                </td>
+
+                <td>
+                    <p>{{session.drill_type}}</p>
+                </td>
+                <td>
+                    <p>{{ 'Active' if session.active else 'Inactive' }}</p>
+                </td>
+                <td>
+                    <a class="btn btn-custom" style="max-width: fit-content;" href="{{url_for('results', user_id=user.user_id, session_id=session.id, drill_slug=session.drill_type) }}">
+                        <p>View Results</p>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% elif users is none and results is none %}
+    <h2>User Sessions</h2>
+    <p>
+        No User Sessions are available
+    </p>
     {% endif %}
 
-    <!-- <p>
-        <a href="{{ url_for('results', user_id=user.user_id) }}" class="btn result">← Back to sessions</a><br>
-        <a href="{{ url_for('results') }}" class="btn">← Back to users</a>
-    </p> -->
+
+
+    <!-- Displaying Users here -->
+    {% if users %}
+    <h2>Users Results</h2>
+    <table class="user-table results-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>User ID</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="userList">
+            {% for user in users %}
+            <tr>
+                <td>
+                    <i class="fas fa-user"></i>
+                </td>
+                <td>
+                    <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+                </td>
+                <td>
+                    <p>{{user.user_id}}</p>
+                </td>
+                <td>
+                    <a class="btn btn-custom" style="max-width: fit-content;" href="{{url_for('results', user_id=user.user_id) }}">
+                        <p>View Sessions</p>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% elif user is none %}
+    <h2>Users Results</h2>
+    <p>
+        No Users are available
+    </p>
     {% endif %}
-
-
 </div>
 {% endblock %}

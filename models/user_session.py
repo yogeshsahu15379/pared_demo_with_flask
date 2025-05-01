@@ -4,6 +4,7 @@ from typing import Optional
 
 from models.drill import DrillType, DRILL_SLUG_MAP
 from config import engine
+from models.user import get_user_by_id
 
 class UserSession(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -18,9 +19,9 @@ class UserSession(SQLModel, table=True):
     active: bool = True
 
 
-def create_user_session(user_id, first_name, last_name, drill_type: DrillType = None):
+def create_user_session(user_id, drill_type: DrillType = None):
     user_session = UserSession(
-        user_id=user_id, first_name=first_name, last_name=last_name, drill_type=drill_type
+        user_id=user_id, drill_type=drill_type
     )
     with Session(engine) as session:
         session.add(user_session)
@@ -42,9 +43,18 @@ def end_user_session(user_id):
             session.refresh(user_session)
 
 def get_all_active_user_sessions():
+    sessions_with_name = []
     with Session(engine) as session:
         statement = select(UserSession).where(UserSession.active == True)  # noqa: E712
-        return session.exec(statement).all()
+        sessions = session.exec(statement).all()
+
+        for session in sessions:
+            user = get_user_by_id(session.user_id)
+            if user:
+                session.first_name = user.first_name
+                session.last_name = user.last_name
+                sessions_with_name.append(session)
+        return sessions_with_name
 
 def update_drill_type(user_id, drill_type: DrillType):
     with Session(engine) as session:
@@ -75,7 +85,7 @@ def get_last_active_session_by_user_id(user_id):
         if data:
             return data.dict()
 
-def get_all_users(drill_type: DrillType | None = None) -> list[dict]:
+def get_all_user_sessions(drill_type: DrillType | None = None) -> list[dict]:
     with Session(engine) as db:
         stmt = select(
             UserSession.user_id, UserSession.first_name, UserSession.last_name
