@@ -21,12 +21,16 @@
       <a href="/baju_swing_result"
         ><button type="button" class="btn result">View Result</button></a
       >
+      <a href="/download-pdf/baju_swing_result" class="download-btn" download>
+        📥 Download Result
+    </a>
     </div>
     <script>
       function startTracking() {
         fetch("/start_tracking/baju_swing_1")
           .then((response) => response.json())
           .then((data) => alert(data.status));
+          window.location.href = "/bajuswing/analysis";
       }
       function stopTracking() {
         fetch("/stop_tracking/baju_swing_1")

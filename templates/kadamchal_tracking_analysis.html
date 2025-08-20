@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kadam- chal Tracking</title>
+    <style>
+        .btn-custom {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {background-color: #3e8e41}
+
+        .btn-custom:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 95vh;
+        }
+
+        .btn {
+            display: block;
+            width: 200px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .btn.stop {
+            background-color: #dc3545;
+        }
+        .btn.stop:hover {
+            background-color: #c82333;
+        }
+        .btn.result {
+            background-color: #ffc107;
+        }
+        .btn.result:hover {
+            background-color: #e0a800;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            cursor: pointer;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-custom {
+            display: block;
+            width: 200px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn-custom:hover {
+            background-color: #3e8e41;
+        }
+
+        .btn-custom:active {
+            transform: scale(0.98);
+        }
+        a{
+            text-decoration: none;
+        }
+        .analysis_container{
+            display: flex;
+        }
+        .analysis_container img{
+            width: 300px;
+            height: 600px;
+        }
+    </style>
+    </head>
+<body>
+    <div class="analysis_container">
+
+        <div class="container mt-5">
+            <h1 style="text-align: center;">Kadam-Chal Control Pannel</h1>
+            <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
+            <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
+            <a href="/kadamchal_result"><button type="button" class="btn result">View Result</button></a>
+        </div>
+        <div>
+            <img src="{{ url_for('kadamchal_live_feed') }}" width="640" height="480">
+            
+        </div>
+    </div>
+    <script>
+        function startTracking() {
+            fetch('/start_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
+        }
+        function stopTracking() {
+            fetch('/stop_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
+            window.location.href = "/kadamchal";
+        }
+        </script>
+</body>
+</html>

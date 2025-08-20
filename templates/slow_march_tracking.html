@@ -27,6 +27,7 @@
         fetch("/start_tracking/slowmarch")
           .then((response) => response.json())
           .then((data) => alert(data.status));
+        window.location.href = "/slowmarch/analysis";
       }
       function stopTracking() {
         fetch("/stop_tracking/slowmarch")

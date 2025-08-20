@@ -3,3 +3,6 @@ opencv-python
 numpy
 mediapipe
 gunicorn
+fpdf
+sqlmodel
+pydantic

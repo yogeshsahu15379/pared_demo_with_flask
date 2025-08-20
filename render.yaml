@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: salute-detection
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
-    plan: free
-    region: oregon

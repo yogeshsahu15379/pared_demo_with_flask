@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tej chal Tracking</title>
+    <link
+      rel="stylesheet"
+      href="../static/style.css"
+    />
+    <style>
+      .analysis_container{
+            display: flex;
+        }
+        .analysis_container img{
+            width: 300px;
+            height: 600px;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="analysis_container">
+
+    <div class="container mt-5">
+      <h1 style="text-align: center">Tej Chal Control Panel</h1>
+      <button type="button" class="btn start" onclick="startTracking()">
+        Start Tracking
+      </button>
+      <button type="button" class="btn stop" onclick="stopTracking()">
+        Stop Tracking
+      </button>
+      <a href="/tejchal_result"
+        ><button type="button" class="btn result">View Result</button></a
+      >
+    </div>
+    <div>
+      <img src="{{ url_for('tej_chal_live_feed') }}" width="640" height="480">
+    </div>
+    </div>
+    <script>
+      function startTracking() {
+        fetch("/start_tracking/tejchal")
+          .then((response) => response.json())
+          .then((data) => alert(data.status));
+      }
+      function stopTracking() {
+        fetch("/stop_tracking/tejchal")
+          .then((response) => response.json())
+          .then((data) => alert(data.status));
+      }
+    </script>
+  </body>
+</html>

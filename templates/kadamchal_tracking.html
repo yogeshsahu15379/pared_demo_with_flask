@@ -105,10 +105,14 @@
         <button type="button" class="btn start" onclick="startTracking()">Start Tracking</button>
 <button type="button" class="btn stop" onclick="stopTracking()">Stop Tracking</button>
         <a href="/kadamchal_result"><button type="button" class="btn result">View Result</button></a>
+        <a href="/download-pdf/kadamtal_result" class="download-btn" download>
+            📥 Download PDF
+        </a>
     </div>
     <script>
         function startTracking() {
             fetch('/start_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
+            window.location.href = "/kadamchal/analysis";
         }
         function stopTracking() {
             fetch('/stop_tracking/kadamchal').then(response => response.json()).then(data => alert(data.status));
